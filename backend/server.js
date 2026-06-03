@@ -1,259 +1,33 @@
-require("dotenv").config();
+const path = require("path");
 
-// Import packages
-const express = require("express");
+// Load environment variables before starting the server
+require("dotenv").config({ path: path.join(__dirname, "../.env") });
+
 const db = require("./config/db");
+const app = require("./app");
 
-// Create app
-const app = express();
+const PORT = process.env.PORT || 3000;
 
-// Middleware to read JSON body
-app.use(express.json());
-
-
-// ================= TEST ROUTE =================
-
-// Check if server is running
-app.get("/", (req, res) => {
-    res.send("Server is running 🚀");
-});
-
-
-// ================= GET ALL BOOKINGS =================
-
-// Fetch all bookings
-app.get("/bookings", async (req, res) => {
+// Verify that the database schema has been upgraded
+async function verifySchema() {
     try {
-        const [results] = await db.query("SELECT * FROM bookings");
+        const [resourceTable] = await db.query("SHOW TABLES LIKE 'resources'");
+        const [resourceColumn] = await db.query("SHOW COLUMNS FROM bookings LIKE 'resource_id'");
 
-        return res.status(200).json({
-            success: true,
-            message: "Bookings fetched successfully",
-            data: results
-        });
-
+        if (resourceTable.length === 0 || resourceColumn.length === 0) {
+            console.warn("\n⚠  Database upgrade required!");
+            console.warn("   Run database/ADMIN_upgrade.sql as MySQL admin, then restart.\n");
+        }
     } catch (err) {
-        console.error("Fetch error ❌", err);
-
-        return res.status(500).json({
-            success: false,
-            message: "Database error"
-        });
+        console.error("Schema check failed:", err.message);
     }
-});
+}
 
-
-// ================= CREATE NEW BOOKING =================
-
-// Create new booking
-app.post("/booking", async (req, res) => {
-    try {
-        // Extract data from request body
-        const { name, booking_date } = req.body;
-
-        // Validate required fields
-        if (!name || !booking_date) {
-            return res.status(400).json({
-                success: false,
-                message: "Name and booking_date are required",
-                data: null
-            });
-        }
-
-        // Insert booking into database
-        const [result] = await db.query(
-            "INSERT INTO bookings (name, booking_date, status) VALUES (?, ?, ?)",
-            [name, booking_date, "pending"]
-        );
-
-        // Prepare response data
-        const newBooking = {
-            id: result.insertId,
-            name,
-            booking_date,
-            status: "pending"
-        };
-
-        return res.status(201).json({
-            success: true,
-            message: "Booking created successfully",
-            data: newBooking
-        });
-
-    } catch (err) {
-        console.error("Create booking error ❌", err);
-
-        return res.status(500).json({
-            success: false,
-            message: "Failed to create booking"
-        });
-    }
-});
-// ================= DELETE BOOKING BY ID =================
-
-// Delete booking by ID
-app.delete("/booking/:id", async (req, res) => {
-    try {
-        // Extract and validate booking ID from route params
-        const { id } = req.params;
-        const bookingId = parseInt(id, 10);
-
-        // Check if bookingId is a valid positive integer
-        if (isNaN(bookingId) || bookingId <= 0) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid booking ID"
-            });
-        }
-
-        // Attempt to delete the booking from the database
-        const [result] = await db.query(
-            "DELETE FROM bookings WHERE id = ?",
-            [bookingId]
-        );
-
-        // Check if a booking was deleted
-        if (result.affectedRows === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "Booking not found"
-            });
-        }
-
-        // Respond with success message
-        return res.json({
-            success: true,
-            message: "Booking deleted successfully"
-        });
-
-    } catch (err) {
-        console.error("Delete booking error ❌", err);
-
-        return res.status(500).json({
-            success: false,
-            message: "Failed to delete booking"
-        });
-    }
-});
-
-
-
-// ================= UPDATE BOOKING =================
-
-app.put("/booking/:id", async (req, res) => {
-    try {
-
-        // Extract booking ID
-        const { id } = req.params;
-        const bookingId = parseInt(id, 10);
-
-        // Validate booking ID
-        if (isNaN(bookingId) || bookingId <= 0) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid booking ID"
-            });
-        }
-
-        // Extract request body
-        const { name, booking_date, status } = req.body;
-
-        // Validate status
-        const validStatus = ["pending", "confirmed", "cancelled"];
-
-        if (status !== undefined && !validStatus.includes(status)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid status value"
-            });
-        }
-
-        // Validate name
-        if (name !== undefined && name.trim() === "") {
-            return res.status(400).json({
-                success: false,
-                message: "Name cannot be empty"
-            });
-        }
-
-        // Allowed fields
-        const allowedFields = ["name", "booking_date", "status"];
-
-        // Build updates object dynamically
-        const updates = {};
-
-        for (let key of allowedFields) {
-
-            if (req.body[key] !== undefined) {
-
-                // Clean spaces for name
-                if (key === "name") {
-                    updates[key] = req.body[key].trim();
-                } else {
-                    updates[key] = req.body[key];
-                }
-
-            }
-        }
-
-        // Ensure at least one field exists
-        if (Object.keys(updates).length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: "No fields provided for update"
-            });
-        }
-
-        // Build dynamic SET clause
-        const setClause = Object.keys(updates)
-            .map(field => `${field} = ?`)
-            .join(", ");
-
-        // Extract values
-        const values = Object.values(updates);
-
-        // Execute update query
-        const [result] = await db.query(
-            `UPDATE bookings SET ${setClause} WHERE id = ?`,
-            [...values, bookingId]
-        );
-
-        // Check if booking exists
-        if (result.affectedRows === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "Booking not found"
-            });
-        }
-
-        // Fetch updated booking
-        const [rows] = await db.query(
-            "SELECT * FROM bookings WHERE id = ?",
-            [bookingId]
-        );
-
-        // Success response
-        return res.status(200).json({
-            success: true,
-            message: "Booking updated successfully",
-            data: rows[0]
-        });
-
-    } catch (err) {
-
-        console.error("Update booking error ❌", err);
-
-        return res.status(500).json({
-            success: false,
-            message: "Could not update booking"
-        });
-    }
-});
-
-
-// ================= START SERVER =================
-
-// Start server
-app.listen(3000, () => {
-    console.log("Server running on port 3000 🚀");
+// Start HTTP server
+verifySchema().then(() => {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT} 🚀`);
+        console.log(`Frontend: http://localhost:${PORT}`);
+        console.log(`API:      http://localhost:${PORT}/api/v1/bookings`);
+    });
 });

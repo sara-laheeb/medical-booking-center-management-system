@@ -1,22 +1,24 @@
 {
   "name": "booking-system",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "2.0.0",
+  "description": "Complete booking system with REST API and web frontend",
+  "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test backend/tests/api.test.js",
+    "migrate": "node backend/scripts/runMigrations.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "mysql2": "^3.22.3"
   },
-  "directories": {
-    "doc": "docs"
+  "devDependencies": {
+    "supertest": "^7.1.0"
   }
 }

@@ -1,6 +1,42 @@
-### GET all bookings
-GET http://localhost:3000/bookings
+### Health check
+GET http://localhost:3000/api/health
 
+### GET all bookings (with pagination & filters)
+GET http://localhost:3000/api/v1/bookings?page=1&limit=10&status=pending
 
-### DELETE booking
-DELETE http://localhost:3000/booking/2
+### GET single booking
+GET http://localhost:3000/api/v1/bookings/1
+
+### GET all resources
+GET http://localhost:3000/api/v1/resources
+
+### GET resource availability
+GET http://localhost:3000/api/v1/resources/1/availability?date=2026-06-15
+
+### CREATE booking
+POST http://localhost:3000/api/v1/bookings
+Content-Type: application/json
+
+{
+  "name": "Sara",
+  "email": "sara@example.com",
+  "resource_id": 1,
+  "booking_date": "2026-06-15",
+  "start_time": "11:00",
+  "end_time": "12:00",
+  "notes": "Team meeting"
+}
+
+### UPDATE booking
+PUT http://localhost:3000/api/v1/bookings/1
+Content-Type: application/json
+
+{
+  "status": "confirmed"
+}
+
+### DELETE booking (soft delete)
+DELETE http://localhost:3000/api/v1/bookings/2
+
+### Unknown route (404 JSON)
+GET http://localhost:3000/api/v1/unknown

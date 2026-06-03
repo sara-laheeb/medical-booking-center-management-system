@@ -1,10 +1,6 @@
-// Load environment variables
-require("dotenv").config();
-
-// Import mysql2 package
 const mysql = require("mysql2");
 
-// Create MySQL connection pool
+// Create a reusable MySQL connection pool (env loaded in server.js)
 const db = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -15,5 +11,4 @@ const db = mysql.createPool({
     queueLimit: 0
 }).promise();
 
-// Export database pool
 module.exports = db;
