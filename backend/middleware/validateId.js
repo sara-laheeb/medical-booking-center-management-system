@@ -1,15 +1,22 @@
-const { sendError } = require("../utils/apiResponse");
+'use strict';
 
-// Validate :id route parameter and attach a numeric bookingId to the request
-const validateId = (req, res, next) => {
-    const bookingId = parseInt(req.params.id, 10);
+const AppError = require('../errors/AppError');
 
-    if (Number.isNaN(bookingId) || bookingId <= 0) {
-        return sendError(res, 400, "Invalid booking ID");
-    }
+/**
+ * validateId — Validates :id (or any named) numeric route parameter.
+ * Usage: router.get('/:id', validateId(), controller.getById)
+ *        router.get('/:patientId/x', validateId('patientId'), ...)
+ */
+const validateId = (paramName = 'id') => (req, res, next) => {
+  const raw = req.params[paramName];
+  const parsed = parseInt(raw, 10);
 
-    req.bookingId = bookingId;
-    next();
+  if (Number.isNaN(parsed) || parsed <= 0 || String(parsed) !== String(raw).trim()) {
+    return next(new AppError(`Invalid ${paramName}: must be a positive integer`, 400));
+  }
+
+  req.params[paramName] = parsed;
+  next();
 };
 
 module.exports = validateId;

@@ -5,7 +5,7 @@ const path = require("path");
 
 require("dotenv").config({ path: path.join(__dirname, "../../.env") });
 
-const db = require("../config/db");
+const db = require("../config/database");
 const app = require("../app");
 
 let schemaReady = false;

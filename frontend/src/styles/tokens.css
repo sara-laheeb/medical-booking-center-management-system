@@ -1,0 +1,125 @@
+/*
+  Design tokens — reused as-is from the approved
+  medicare-design-system.html reference. Do not redefine values here;
+  add new tokens only if the reference truly has no equivalent.
+*/
+/* =========================
+   Color Tokens
+   ========================= */
+:root {
+  --p-50: #f1faf8;
+  --p-100: #dcf3ee;
+  --p-200: #b7e6dd;
+  --p-300: #8ad6c9;
+  --p-400: #4dbfae;
+  --p-500: #16a394;
+  --p-600: #128577;
+  --p-700: #0f6e64;
+  --p-800: #0c544d;
+  --p-900: #0b3d3a;
+
+/* Primary brand palette */
+  --a-400: #f3b65c;
+  --a-500: #e8a33d;
+  --a-600: #c9822a;
+
+/* Typography */
+
+  --success-500: #16a34a;
+  --success-100: #dcfce7;
+  --success-700: #15803d;
+  --warning-500: #e8a33d;
+  --warning-100: #fdf1dc;
+  --warning-700: #b4791f;
+  --error-500: #dc4e4e;
+  --error-100: #fbe2e2;
+  --error-700: #b43333;
+  --info-500: #3b82c4;
+  --info-100: #deebf8;
+  --info-700: #2563a3;
+
+/* Spacing scale */
+  --n-0: #ffffff;
+  --n-50: #f8fafc;
+  --n-100: #f1f5f9;
+  --n-200: #e2e8f0;
+  --n-300: #cbd5e1;
+  --n-400: #94a3b8;
+  --n-500: #64748b;
+  --n-600: #475569;
+  --n-700: #334155;
+  --n-800: #1f2937;
+  --n-900: #111827;
+  --n-950: #0b1220;
+
+  /* Border radius */
+
+  --font-display: 'Rubik', sans-serif;
+  --font-body: 'Rubik', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur: 250ms;
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  --r-sm: 8px;
+  --r-md: 11px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+  --r-full: 999px;
+
+/* Shadows */
+  --shadow-sm: 0 1px 2px rgba(15,23,42,.04), 0 1px 1px rgba(15,23,42,.03);
+  --shadow-md: 0 12px 28px rgba(15,23,42,.07), 0 3px 8px rgba(15,23,42,.04);
+  --shadow-lg: 0 28px 56px rgba(15,23,42,.1), 0 10px 20px rgba(15,23,42,.05);
+  --shadow-brand: 0 14px 32px rgba(15,110,100,.2);
+  
+/* Default light theme */
+
+  --bg-canvas: var(--n-50);
+  --bg-surface: var(--n-0);
+  --bg-surface-alt: var(--n-100);
+  --border-default: var(--n-200);
+  --border-subtle: rgba(15,23,42,.06);
+  --text-primary: var(--n-900);
+  --text-secondary: var(--n-500);
+  --text-inverse: var(--n-0);
+  --ink: #0b2c29;
+  --brand: var(--p-700);
+  --brand-hover: var(--p-800);
+  --brand-soft: var(--p-100);
+  --glow-1: rgba(22,163,148,.09);
+  --glow-2: rgba(232,163,61,.07);
+}
+
+/* Original Medicare Dark Theme */
+[data-theme="dark"] {
+  --bg-canvas: var(--n-950);
+  --bg-surface: #111B2E;
+  --bg-surface-alt: #16233A;
+  --border-default: #233149;
+  --text-primary: var(--n-50);
+  --text-secondary: var(--n-400);
+  --text-inverse: var(--n-950);
+  --brand: var(--p-400);
+  --brand-hover: var(--p-300);
+  --brand-soft: rgba(77,191,174,.14);
+  --border-subtle: rgba(255,255,255,.07);
+  --ink: #EAF6F3;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.35);
+  --shadow-md: 0 14px 30px rgba(0,0,0,.4);
+  --shadow-lg: 0 30px 60px rgba(0,0,0,.5);
+  --shadow-brand: 0 14px 32px rgba(77,191,174,.22);
+  --glow-1: rgba(22,163,148,.14);
+  --glow-2: rgba(232,163,61,.08);
+}

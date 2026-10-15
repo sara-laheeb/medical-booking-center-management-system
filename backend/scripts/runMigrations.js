@@ -4,12 +4,15 @@ const mysql = require("mysql2/promise");
 
 const MIGRATIONS_DIR = path.join(__dirname, "../../database");
 
+// Active database schema and migration files in execution order
 const MIGRATION_FILES = [
-    "004_create_resources_table.sql",
-    "005_upgrade_bookings_table.sql"
+    "002 medical center schema.sql",
+    "migrations.sql"
 ];
 
-// Run SQL migration files in order
+/**
+ * Execute SQL migration files sequentially against the configured database.
+ */
 async function runMigrations() {
     require("dotenv").config({ path: path.join(__dirname, "../../.env") });
 
@@ -25,6 +28,12 @@ async function runMigrations() {
 
     for (const file of MIGRATION_FILES) {
         const filePath = path.join(MIGRATIONS_DIR, file);
+
+        if (!fs.existsSync(filePath)) {
+            console.warn(`  ⚠ File not found, skipping: ${file}\n`);
+            continue;
+        }
+
         const sql = fs.readFileSync(filePath, "utf8");
 
         console.log(`→ ${file}`);
@@ -33,7 +42,12 @@ async function runMigrations() {
             await connection.query(sql);
             console.log(`  ✓ Done\n`);
         } catch (err) {
-            if (err.code === "ER_DUP_FIELDNAME" || err.code === "ER_TABLE_EXISTS_ERROR" || err.code === "ER_DUP_ENTRY") {
+            if (
+                err.code === "ER_DUP_FIELDNAME" ||
+                err.code === "ER_TABLE_EXISTS_ERROR" ||
+                err.code === "ER_DUP_ENTRY" ||
+                err.code === "ER_DUP_KEYNAME"
+            ) {
                 console.log(`  ⚠ Skipped (already applied)\n`);
                 continue;
             }
