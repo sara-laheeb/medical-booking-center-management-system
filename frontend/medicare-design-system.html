@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediCare Center — Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  :root{
+    --p-50:#F1FAF8;  --p-100:#DCF3EE; --p-200:#B7E6DD; --p-300:#8AD6C9;
+    --p-400:#4DBFAE; --p-500:#16A394; --p-600:#128577; --p-700:#0F6E64;
+    --p-800:#0C544D; --p-900:#0B3D3A;
+
+    --a-400:#F3B65C; --a-500:#E8A33D; --a-600:#C9822A;
+
+    --success-500:#16A34A; --success-100:#DCFCE7; --success-700:#15803D;
+    --warning-500:#E8A33D; --warning-100:#FDF1DC; --warning-700:#B4791F;
+    --error-500:#DC4E4E;   --error-100:#FBE2E2;   --error-700:#B43333;
+    --info-500:#3B82C4;    --info-100:#DEEBF8;    --info-700:#2563A3;
+
+    --n-0:#FFFFFF; --n-50:#F8FAFC; --n-100:#F1F5F9; --n-200:#E2E8F0;
+    --n-300:#CBD5E1; --n-400:#94A3B8; --n-500:#64748B; --n-600:#475569;
+    --n-700:#334155; --n-800:#1F2937; --n-900:#111827; --n-950:#0B1220;
+
+    --font-display:'Rubik', sans-serif;
+    --font-body:'Rubik', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+    --ease:cubic-bezier(.4,0,.2,1);
+    --dur:250ms;
+
+    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px;
+    --sp-6:24px; --sp-8:32px; --sp-10:40px; --sp-12:48px; --sp-16:64px;
+
+    --r-sm:8px; --r-md:11px; --r-lg:16px; --r-xl:24px; --r-full:999px;
+
+    --shadow-sm:0 1px 2px rgba(15,23,42,0.04), 0 1px 1px rgba(15,23,42,0.03);
+    --shadow-md:0 12px 28px rgba(15,23,42,0.07), 0 3px 8px rgba(15,23,42,0.04);
+    --shadow-lg:0 28px 56px rgba(15,23,42,0.10), 0 10px 20px rgba(15,23,42,0.05);
+    --shadow-brand:0 14px 32px rgba(15,110,100,0.20);
+
+    --bg-canvas:var(--n-50);
+    --bg-surface:var(--n-0);
+    --bg-surface-alt:var(--n-100);
+    --border-default:var(--n-200);
+    --border-subtle:rgba(15,23,42,0.06);
+    --text-primary:var(--n-900);
+    --text-secondary:var(--n-500);
+    --text-inverse:var(--n-0);
+    --ink:#0B2C29;
+    --brand:var(--p-700);
+    --brand-hover:var(--p-800);
+    --brand-soft:var(--p-100);
+    --glow-1:rgba(22,163,148,0.09);
+    --glow-2:rgba(232,163,61,0.07);
+  }
+
+  [data-theme="dark"]{
+    --bg-canvas:var(--n-950);
+    --bg-surface:#111B2E;
+    --bg-surface-alt:#16233A;
+    --border-default:#233149;
+    --text-primary:var(--n-50);
+    --text-secondary:var(--n-400);
+    --text-inverse:var(--n-950);
+    --brand:var(--p-400);
+    --brand-hover:var(--p-300);
+    --brand-soft:rgba(77,191,174,0.14);
+    --border-subtle:rgba(255,255,255,0.07);
+    --ink:#EAF6F3;
+    --shadow-sm:0 1px 2px rgba(0,0,0,0.35);
+    --shadow-md:0 14px 30px rgba(0,0,0,0.4);
+    --shadow-lg:0 30px 60px rgba(0,0,0,0.5);
+    --shadow-brand:0 14px 32px rgba(77,191,174,0.22);
+    --glow-1:rgba(22,163,148,0.14);
+    --glow-2:rgba(232,163,61,0.08);
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  *:focus-visible{ outline:2px solid var(--brand); outline-offset:2px; border-radius:4px; }
+  html{scroll-behavior:smooth;}
+  ::selection{ background:var(--p-200); color:var(--p-900); }
+  body{
+    font-family:var(--font-body);
+    background:var(--bg-canvas);
+    color:var(--text-primary);
+    -webkit-font-smoothing:antialiased;
+    transition:background .3s var(--ease), color .3s var(--ease);
+    position:relative;
+    min-height:100vh;
+  }
+  body::before{
+    content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background:
+      radial-gradient(620px circle at 12% -8%, var(--glow-1), transparent 60%),
+      radial-gradient(520px circle at 102% 0%, var(--glow-2), transparent 55%);
+  }
+  h1,h2,h3,.font-display{ font-family:var(--font-display); letter-spacing:-0.02em; color:var(--ink); }
+  [dir="rtl"] body{ line-height:1.75; }
+  [dir="rtl"] h1,[dir="rtl"] h2,[dir="rtl"] h3,[dir="rtl"] .font-display{ letter-spacing:0; line-height:1.5; }
+  [dir="rtl"] .section-eyebrow{ letter-spacing:0; }
+  [dir="rtl"] .badge, [dir="rtl"] .workspace-tag{ letter-spacing:0; }
+  [dir="rtl"] body{ line-height:1.75; }
+  [dir="rtl"] h1,[dir="rtl"] h2,[dir="rtl"] h3,[dir="rtl"] .font-display,
+  [dir="rtl"] .page-title,[dir="rtl"] .section-title,[dir="rtl"] .stat-value{ letter-spacing:0; line-height:1.5; }
+  [dir="rtl"] .section-note,[dir="rtl"] .page-desc,[dir="rtl"] .ac-sub,[dir="rtl"] .type-row{ line-height:1.85; }
+  [dir="rtl"] .badge,[dir="rtl"] .btn{ letter-spacing:0; }
+  .mono{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; }
+  a{ color:inherit; }
+
+  /* ============ LAYOUT ============ */
+  .shell{ display:flex; min-height:100vh; }
+  .sidenav{
+    width:248px; flex-shrink:0; position:sticky; top:0; height:100vh;
+    background:color-mix(in srgb, var(--bg-surface) 88%, transparent);
+    backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+    border-inline-end:1px solid var(--border-default);
+    padding:var(--sp-6) var(--sp-4); display:flex; flex-direction:column;
+    transition:width var(--dur) var(--ease), background .3s var(--ease), border-color .3s var(--ease);
+    position:sticky; isolation:isolate;
+  }
+  .sidenav::before{
+    content:""; position:absolute; inset-inline-start:0; top:0; width:100%; height:220px; z-index:-1; pointer-events:none;
+    background:radial-gradient(180px circle at 15% 0%, var(--glow-1), transparent 70%);
+  }
+  .sidenav.collapsed{ width:80px; align-items:center; }
+  .sidenav .brand{ display:flex; align-items:center; gap:var(--sp-3); margin-bottom:6px; width:100%; }
+  .collapse-btn{
+    margin-inline-start:auto; width:26px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+    color:var(--text-secondary); cursor:pointer; transition:all var(--dur) var(--ease); flex-shrink:0;
+  }
+  .collapse-btn:hover{ background:var(--bg-surface-alt); color:var(--brand); }
+  .collapse-btn svg{ width:15px; height:15px; transition:transform var(--dur) var(--ease); }
+  .sidenav.collapsed .collapse-btn svg{ transform:rotate(180deg); }
+  .sidenav.collapsed .brand{ justify-content:center; }
+  .sidenav.collapsed .collapse-btn{ display:none; }
+  .sidenav-text{ transition:opacity .18s var(--ease); white-space:nowrap; overflow:hidden; }
+  .sidenav.collapsed .sidenav-text{ opacity:0; width:0; height:0; position:absolute; pointer-events:none; }
+  .sidenav.collapsed .workspace-tag, .sidenav.collapsed .search-bar, .sidenav.collapsed .nav-group-label{ display:none; }
+  .sidenav.collapsed nav a{ justify-content:center; padding:10px; }
+  .sidenav.collapsed .sidenav-footer{ flex-direction:column; }
+  .sidenav.collapsed .user-meta{ display:none; }
+  .brand-mark{
+    width:38px; height:38px; border-radius:11px;
+    background:linear-gradient(150deg,var(--p-400),var(--p-700));
+    box-shadow:0 6px 16px rgba(15,110,100,.38), inset 0 1px 0 rgba(255,255,255,.3), inset 0 -6px 10px rgba(0,0,0,.08);
+    display:flex; align-items:center; justify-content:center; color:#fff;
+    font-weight:800; font-family:var(--font-display); font-size:16px; flex-shrink:0;
+    position:relative;
+  }
+  .brand-mark::after{
+    content:""; position:absolute; inset:-3px; border-radius:14px; border:1px solid rgba(15,110,100,.18); pointer-events:none;
+  }
+  .brand-mark svg{ position:relative; top:.5px; }
+  .brand-name{ font-family:var(--font-display); font-weight:800; font-size:15px; line-height:1.2; }
+  .brand-sub{ font-size:11px; color:var(--text-secondary); margin-top:1px; }
+  .workspace-tag{
+    display:inline-flex; align-items:center; gap:6px; font-size:10.5px; font-weight:600;
+    color:var(--brand); background:var(--brand-soft); padding:4px 9px 4px 8px; border-radius:var(--r-full);
+    margin:14px 0 20px; box-shadow:inset 0 0 0 1px rgba(15,110,100,.1);
+  }
+  .workspace-tag::before{ content:""; width:6px; height:6px; border-radius:50%; background:var(--success-500); box-shadow:0 0 0 3px rgba(22,163,74,.18); animation:pulse 2.4s ease-in-out infinite; }
+
+  .search-bar{
+    display:flex; align-items:center; gap:8px; padding:9px 11px; border-radius:var(--r-md);
+    border:1px solid var(--border-subtle); background:var(--bg-surface-alt); color:var(--text-secondary);
+    font-size:12.5px; cursor:pointer; transition:all var(--dur) var(--ease); margin-bottom:var(--sp-4);
+  }
+  .search-bar:hover{ border-color:var(--brand); color:var(--text-primary); background:var(--bg-surface); box-shadow:0 0 0 3px var(--brand-soft); }
+  .search-bar svg{ width:15px; height:15px; flex-shrink:0; }
+  .search-bar kbd{ margin-inline-start:auto; font-family:var(--font-mono); font-size:10px; background:var(--bg-surface); border:1px solid var(--border-default); border-radius:5px; padding:2px 6px; }
+
+  .icon-mirror{ display:inline-block; transition:transform var(--dur) var(--ease); }
+  [dir="rtl"] .icon-mirror{ transform:scaleX(-1); }
+
+  .breadcrumb{ display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text-secondary); margin-bottom:10px; }
+  .breadcrumb .sep{ opacity:.5; }
+  .breadcrumb .current{ color:var(--brand); font-weight:600; }
+
+  .nav-scroll{ flex:1; overflow-y:auto; }
+  .sidenav nav a.active-link{
+    background:linear-gradient(120deg, var(--brand-soft), color-mix(in srgb, var(--brand-soft) 40%, transparent));
+    color:var(--brand); font-weight:600; box-shadow:inset 0 0 0 1px rgba(15,110,100,.14);
+  }
+  .sidenav nav a.active-link svg{ opacity:1; color:var(--brand); }
+  .nav-group-label{ font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.09em; color:var(--n-400); margin:22px 6px 10px; display:flex; align-items:center; gap:7px; }
+  .nav-group-label:first-child{ margin-top:0; }
+  .nav-group-label::after{ content:""; flex:1; height:1px; background:linear-gradient(90deg, var(--border-default), transparent); }
+  .sidenav nav a{
+    display:flex; align-items:center; gap:10px; font-size:13px; font-weight:500; color:var(--text-secondary);
+    text-decoration:none; padding:8px 10px; border-radius:var(--r-md); margin-bottom:2px; position:relative;
+    transition:background var(--dur) var(--ease), color var(--dur) var(--ease), transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+  .sidenav nav a::before{
+    content:""; position:absolute; inset-inline-start:-16px; top:50%; transform:translateY(-50%); height:0;
+    width:3px; border-radius:0 3px 3px 0; background:linear-gradient(180deg,var(--p-400),var(--brand));
+    transition:height var(--dur) var(--ease);
+    box-shadow:0 0 8px rgba(15,110,100,.5);
+  }
+  [dir="rtl"] .sidenav nav a::before{ border-radius:3px 0 0 3px; }
+  .sidenav nav a.active-link::before{ height:22px; }
+  .sidenav nav a svg{ width:16px; height:16px; flex-shrink:0; opacity:.85; transition:opacity var(--dur) var(--ease), transform var(--dur) var(--ease); }
+  .sidenav nav a.active-link svg{ transform:scale(1.1); }
+  .sidenav nav a:hover{ background:var(--bg-surface-alt); color:var(--text-primary); transform:translateX(3px); }
+  [dir="rtl"] .sidenav nav a:hover{ transform:translateX(-3px); }
+  .sidenav nav a.active-link:hover{ transform:none; }
+
+  .sidenav-footer{
+    border-top:1px solid var(--border-default); padding:12px 10px 12px 6px; margin-top:14px;
+    display:flex; align-items:center; gap:10px; border-radius:var(--r-md); transition:background var(--dur) var(--ease);
+  }
+  .sidenav-footer:hover{ background:var(--bg-surface-alt); }
+  .user-avatar{ width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,var(--p-400),var(--p-700)); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex-shrink:0; box-shadow:0 3px 8px rgba(15,110,100,.28), inset 0 1px 0 rgba(255,255,255,.25); }
+  .user-meta{ flex:1; min-width:0; }
+  .user-name{ font-size:12.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .user-role{ font-size:11px; color:var(--text-secondary); }
+  .icon-btn{ width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); cursor:pointer; transition:all var(--dur) var(--ease); flex-shrink:0; }
+  .icon-btn:hover{ background:var(--bg-surface); color:var(--brand); box-shadow:var(--shadow-sm); }
+  .icon-btn svg{ width:16px; height:16px; }
+
+  body::after{
+    content:""; position:fixed; top:0; left:0; right:0; height:3px; z-index:50;
+    background:linear-gradient(90deg,var(--p-400),var(--p-700) 40%,var(--a-500) 75%,var(--p-500));
+    opacity:.9;
+  }
+  main{ flex:1; min-width:0; padding:56px var(--sp-16) 96px; max-width:1240px; counter-reset:sec; }
+  .topbar{ display:flex; align-items:flex-start; justify-content:space-between; gap:var(--sp-4); margin-bottom:68px; flex-wrap:wrap; }
+  .page-title{ font-size:33px; font-weight:800; color:var(--ink); position:relative; padding-inline-start:20px; }
+  .page-title::before{
+    content:""; position:absolute; inset-inline-start:0; top:5px; bottom:5px; width:4px; border-radius:3px;
+    background:linear-gradient(180deg,var(--p-400),var(--brand),var(--a-500));
+  }
+  .page-desc{ font-size:14px; color:var(--text-secondary); margin-top:8px; margin-inline-start:20px; max-width:540px; line-height:1.65; }
+  .toggles{ display:flex; gap:var(--sp-2); }
+  .toggle-btn{
+    display:flex; align-items:center; gap:7px; font-size:13px; font-weight:600;
+    background:var(--bg-surface); border:1px solid var(--border-default); color:var(--text-primary);
+    padding:9px 15px; border-radius:var(--r-full); cursor:pointer; box-shadow:var(--shadow-sm);
+    transition:all var(--dur) var(--ease);
+  }
+  .toggle-btn:hover{ border-color:var(--brand); color:var(--brand); transform:translateY(-1px); box-shadow:var(--shadow-md), 0 0 0 3px var(--brand-soft); }
+  .toggle-btn:active{ transform:translateY(0) scale(.97); }
+
+  section{ margin-bottom:96px; scroll-margin-top:28px; counter-increment:sec; }
+  .section-head{ margin-bottom:var(--sp-8); position:relative; padding-inline-start:58px; min-height:38px; }
+  .section-head::before{
+    content:counter(sec, decimal-leading-zero); position:absolute; inset-inline-start:0; top:-8px;
+    font-family:var(--font-mono); font-size:33px; font-weight:600; color:var(--border-default); line-height:1;
+    direction:ltr; transition:color .3s var(--ease);
+  }
+  .section-eyebrow{ font-size:11px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--brand); margin-bottom:7px; display:flex; align-items:center; gap:6px; }
+  .section-eyebrow::before{ content:""; width:14px; height:1.5px; background:var(--brand); border-radius:2px; }
+  .section-title{ font-size:22px; font-weight:800; color:var(--ink); }
+  .section-note{ font-size:13.5px; color:var(--text-secondary); margin-top:6px; max-width:660px; line-height:1.7; }
+
+  .card{
+    background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--r-lg);
+    box-shadow:var(--shadow-sm);
+    transition:transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease), background .3s var(--ease);
+    position:relative;
+  }
+  .card::before{
+    content:""; position:absolute; inset:0; border-radius:inherit; padding:1px; pointer-events:none; opacity:0;
+    background:linear-gradient(155deg, rgba(15,110,100,.35), transparent 45%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+    transition:opacity var(--dur) var(--ease);
+  }
+  .card:hover::before{ opacity:1; }
+
+  .swatch-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(122px,1fr)); gap:var(--sp-3); }
+  .swatch{ border-radius:var(--r-md); overflow:hidden; border:1px solid var(--border-default); transition:transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+  .swatch:hover{ transform:translateY(-3px) scale(1.02); box-shadow:var(--shadow-md); }
+  .swatch-color{ height:64px; }
+  .swatch-meta{ padding:8px 10px; background:var(--bg-surface); }
+  .swatch-name{ font-size:11.5px; font-weight:600; }
+  .swatch-hex{ font-size:11px; color:var(--text-secondary); font-family:var(--font-mono); }
+  .palette-group{ margin-bottom:var(--sp-8); }
+  .palette-label{ font-size:12.5px; font-weight:700; margin-bottom:var(--sp-3); color:var(--text-secondary); }
+
+  .type-row{ display:flex; align-items:baseline; justify-content:space-between; padding:var(--sp-5) 0; border-bottom:1px solid var(--border-default); gap:var(--sp-4); flex-wrap:wrap; }
+  .type-row:last-child{ border-bottom:none; }
+  .type-meta{ font-size:12px; color:var(--text-secondary); font-family:var(--font-mono); white-space:nowrap; }
+
+  .scale-row{ display:flex; align-items:center; gap:var(--sp-4); padding:11px 0; border-bottom:1px solid var(--border-default); }
+  .scale-row:last-child{border-bottom:none;}
+  .scale-bar{ background:linear-gradient(90deg,var(--p-500),var(--p-700)); border-radius:3px; height:14px; }
+  .scale-label{ width:120px; font-size:12.5px; font-family:var(--font-mono); color:var(--text-secondary); flex-shrink:0; }
+  .radius-demo{ width:48px; height:48px; background:var(--brand-soft); border:2px solid var(--brand); flex-shrink:0; transition:border-radius .3s var(--ease); }
+  .elevation-demo{ width:110px; height:70px; background:var(--bg-surface); border-radius:var(--r-md); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; color:var(--text-secondary); flex-shrink:0; transition:transform var(--dur) var(--ease); }
+  .elevation-demo:hover{ transform:translateY(-4px) scale(1.03); }
+
+  .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-6); }
+  .grid-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:var(--sp-6); }
+  .row{ display:flex; gap:var(--sp-3); flex-wrap:wrap; align-items:center; }
+  .pad{ padding:28px; }
+  .stack > * + *{ margin-top:var(--sp-4); }
+
+  .btn{
+    font-family:var(--font-body); font-size:13.5px; font-weight:600; border-radius:var(--r-md);
+    padding:10px 18px; border:1px solid transparent; cursor:pointer; display:inline-flex; align-items:center; gap:7px;
+    transition:all var(--dur) var(--ease); line-height:1; position:relative; overflow:hidden; isolation:isolate;
+  }
+  .btn:hover{ transform:translateY(-1px); }
+  .btn:active{ transform:translateY(0) scale(.97); }
+  .btn-primary{ background:linear-gradient(155deg,var(--p-600),var(--brand)); color:#fff; box-shadow:var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,.16); }
+  .btn-primary::after{
+    content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+    background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,.22) 45%, transparent 60%);
+    background-size:220% 100%; background-position:150% 0; transition:background-position .55s var(--ease);
+  }
+  .btn-primary:hover::after{ background-position:-50% 0; }
+  .btn-primary:hover{ background:linear-gradient(155deg,var(--p-500),var(--brand-hover)); box-shadow:var(--shadow-brand), inset 0 1px 0 rgba(255,255,255,.2); transform:translateY(-1px) scale(1.015); }
+  .btn-secondary{ background:var(--brand-soft); color:var(--brand); }
+  .btn-secondary:hover{ filter:brightness(0.96); box-shadow:var(--shadow-sm); transform:translateY(-1px) scale(1.015); }
+  .btn-outline{ background:transparent; border-color:var(--border-default); color:var(--text-primary); }
+  .btn-outline:hover{ border-color:var(--brand); color:var(--brand); background:var(--brand-soft); box-shadow:var(--shadow-sm); transform:translateY(-1px) scale(1.015); }
+  .btn-ghost{ background:transparent; color:var(--text-secondary); }
+  .btn-ghost:hover{ background:var(--bg-surface-alt); color:var(--text-primary); }
+  .btn-danger{ background:var(--error-500); color:#fff; }
+  .btn-danger:hover{ background:var(--error-700); box-shadow:0 8px 20px rgba(220,78,78,.28); }
+  .btn-sm{ padding:7px 13px; font-size:12.5px; }
+  .btn:disabled{ opacity:.45; cursor:not-allowed; transform:none !important; box-shadow:none !important; }
+  .btn:disabled::after{ display:none; }
+  .btn-icon{ width:38px; height:38px; padding:0; justify-content:center; }
+
+  .field{ display:flex; flex-direction:column; gap:6px; }
+  .field label{ font-size:12.5px; font-weight:600; color:var(--text-primary); }
+  .input, select.input, textarea.input{
+    font-family:inherit; font-size:13.5px; padding:10px 13px; border-radius:var(--r-md);
+    border:1.5px solid var(--border-default); background:var(--bg-surface); color:var(--text-primary);
+    outline:none; transition:border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease); width:100%;
+  }
+  .input::placeholder{ color:var(--n-400); }
+  .input:hover{ border-color:var(--n-400); }
+  .input:focus{ border-color:var(--brand); box-shadow:0 0 0 4px var(--brand-soft); transform:translateY(-1px); }
+  .stat-card.featured{
+    background:linear-gradient(165deg, var(--brand-soft), var(--bg-surface) 55%);
+    border-color:rgba(15,110,100,.18);
+  }
+  .stat-card .featured-tag{
+    position:absolute; top:16px; inset-inline-end:16px; font-size:10px; font-weight:700; letter-spacing:.04em;
+    color:var(--brand); background:var(--bg-surface); border:1px solid var(--border-subtle); padding:3px 8px; border-radius:var(--r-full);
+  }
+  .input-error{ border-color:var(--error-500); animation:shake .3s var(--ease); }
+  @keyframes shake{ 25%{ transform:translateX(-3px);} 75%{ transform:translateX(3px);} }
+  .error-text{ font-size:11.5px; color:var(--error-500); font-weight:500; display:flex; align-items:center; gap:4px; }
+  .error-text svg{ width:13px; height:13px; }
+  .input-success{ border-color:var(--success-500); }
+  .success-text{ font-size:11.5px; color:var(--success-700); font-weight:500; display:flex; align-items:center; gap:4px; }
+  .success-text svg{ width:13px; height:13px; }
+  .field.relative{ position:relative; }
+  textarea.input{ resize:vertical; min-height:80px; }
+
+  .checkbox-row, .radio-row{ display:flex; align-items:center; gap:8px; font-size:13px; }
+  .checkbox-row input, .radio-row input{ width:16px; height:16px; accent-color:var(--brand); }
+
+  .switch{ position:relative; width:40px; height:22px; flex-shrink:0; }
+  .switch input{ opacity:0; width:0; height:0; }
+  .switch-track{ position:absolute; inset:0; background:var(--n-300); border-radius:var(--r-full); transition:var(--dur) var(--ease); cursor:pointer; }
+  .switch-track:before{ content:""; position:absolute; width:16px; height:16px; left:3px; top:3px; background:#fff; border-radius:50%; transition:var(--dur) var(--ease); box-shadow:0 1px 3px rgba(0,0,0,.25); }
+  .switch input:checked + .switch-track{ background:var(--brand); }
+  .switch input:checked + .switch-track:before{ transform:translateX(18px); }
+  [dir="rtl"] .switch input:checked + .switch-track:before{ transform:translateX(-18px); }
+
+  .badge{
+    display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700;
+    padding:4px 10px; border-radius:var(--r-full); letter-spacing:.01em;
+  }
+  .badge:before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; }
+  .badge-confirmed{ background:var(--success-100); color:var(--success-700); }
+  .badge-pending{ background:var(--warning-100); color:var(--warning-700); }
+  .badge-pending:before{ animation:pulse 1.7s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{ opacity:1; transform:scale(1);} 50%{ opacity:.35; transform:scale(1.35);} }
+  .badge-cancelled{ background:var(--error-100); color:var(--error-700); }
+  .badge-completed{ background:var(--n-200); color:var(--n-600); }
+  .badge-info{ background:var(--info-100); color:var(--info-700); }
+  [data-theme="dark"] .badge-confirmed{ background:rgba(22,163,74,.16); color:#4ADE80; }
+  [data-theme="dark"] .badge-pending{ background:rgba(232,163,61,.16); color:#F3B65C; }
+  [data-theme="dark"] .badge-cancelled{ background:rgba(220,78,78,.16); color:#F1928F; }
+  [data-theme="dark"] .badge-completed{ background:rgba(255,255,255,.08); color:var(--n-300); }
+  [data-theme="dark"] .badge-info{ background:rgba(59,130,196,.18); color:#7FB4E0; }
+  [data-theme="dark"] .alert-success{ background:rgba(22,163,74,.12); color:#4ADE80; }
+  [data-theme="dark"] .alert-warning{ background:rgba(232,163,61,.12); color:#F3B65C; }
+  [data-theme="dark"] .alert-error{ background:rgba(220,78,78,.12); color:#F1928F; }
+  [data-theme="dark"] .alert-info{ background:rgba(59,130,196,.14); color:#7FB4E0; }
+  [data-theme="dark"] .notif-icon.success{ background:rgba(22,163,74,.16); color:#4ADE80; }
+  [data-theme="dark"] .notif-icon.warning{ background:rgba(232,163,61,.16); color:#F3B65C; }
+
+  .stat-card{ padding:var(--sp-5); position:relative; overflow:hidden; }
+  .stat-card::after{
+    content:""; position:absolute; inset-inline-end:-30px; top:-30px; width:110px; height:110px; border-radius:50%;
+    background:radial-gradient(circle, var(--glow-1), transparent 70%); opacity:0; transition:opacity var(--dur) var(--ease); pointer-events:none;
+  }
+  .stat-card:hover::after{ opacity:1; }
+  .stat-card:hover{ transform:translateY(-6px) scale(1.015); box-shadow:var(--shadow-brand); border-color:var(--brand); }
+  .stat-card .stat-icon{ width:38px; height:38px; border-radius:var(--r-md); background:var(--brand-soft); color:var(--brand); display:flex; align-items:center; justify-content:center; margin-bottom:var(--sp-4); box-shadow:inset 0 0 0 1px rgba(15,110,100,.14); transition:transform var(--dur) var(--ease); }
+  .stat-card:hover .stat-icon{ transform:scale(1.08) rotate(-4deg); }
+  .stat-card .stat-icon svg{ width:18px; height:18px; }
+  .sparkline{ display:flex; align-items:flex-end; gap:3px; height:22px; margin-top:12px; }
+  .sparkline span{ flex:1; border-radius:2px 2px 0 0; background:linear-gradient(180deg,var(--p-400),var(--p-600)); opacity:.55; transition:opacity var(--dur) var(--ease); }
+  .stat-card:hover .sparkline span{ opacity:.95; }
+  .sparkline span:last-child{ background:linear-gradient(180deg,var(--a-400),var(--a-600)); opacity:.9; }
+  .stat-value{
+    font-family:var(--font-display); font-size:27px; font-weight:800; font-variant-numeric:tabular-nums;
+    background:linear-gradient(135deg,var(--p-700),var(--p-500)); -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  [data-theme="dark"] .stat-value{ background:linear-gradient(135deg,var(--p-300),var(--p-500)); -webkit-background-clip:text; background-clip:text; }
+  .stat-label{ font-size:12.5px; color:var(--text-secondary); margin-top:2px; }
+  .stat-delta{ font-size:11.5px; font-weight:700; margin-top:10px; display:inline-flex; align-items:center; gap:4px; }
+  .stat-up{ color:var(--success-700); }
+
+  .accent-card{ display:flex; gap:var(--sp-4); padding:var(--sp-4) var(--sp-5); position:relative; border-inline-start:4px solid var(--brand); }
+  .accent-card:hover{ transform:translateY(-3px) translateX(2px) scale(1.008); box-shadow:var(--shadow-md); }
+  [dir="rtl"] .accent-card:hover{ transform:translateY(-3px) translateX(-2px); }
+  .accent-card.status-confirmed{ border-color:var(--success-500); }
+  .accent-card.status-pending{ border-color:var(--warning-500); }
+  .accent-card.status-cancelled{ border-color:var(--error-500); }
+  .avatar{ width:44px; height:44px; border-radius:var(--r-md); flex-shrink:0; background:var(--p-100); color:var(--p-700); display:flex; align-items:center; justify-content:center; font-weight:700; font-family:var(--font-display); font-size:15px; box-shadow:inset 0 0 0 1px rgba(15,110,100,.12), 0 2px 6px rgba(15,110,100,.08); transition:transform var(--dur) var(--ease); }
+  .accent-card:hover .avatar{ transform:scale(1.06); }
+  .ac-title{ font-size:14px; font-weight:700; }
+  .ac-sub{ font-size:12.5px; color:var(--text-secondary); margin-top:2px; }
+  .ac-meta{ font-size:11.5px; color:var(--text-secondary); margin-top:8px; display:flex; gap:12px; font-family:var(--font-mono); }
+
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  thead th{ position:sticky; top:0; text-align:start; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text-secondary); padding:13px var(--sp-4); background:var(--bg-surface-alt); border-bottom:2px solid transparent; border-image:linear-gradient(90deg,var(--p-400),var(--brand) 35%,transparent) 1; }
+  thead th:first-child{ border-start-start-radius:var(--r-lg); }
+  thead th:last-child{ border-start-end-radius:var(--r-lg); }
+  tbody td{ padding:15px var(--sp-4); border-bottom:1px solid var(--border-subtle); position:relative; }
+  tbody tr{ transition:background var(--dur) var(--ease); position:relative; }
+  tbody tr:nth-child(even){ background:color-mix(in srgb, var(--bg-surface-alt) 55%, transparent); }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr td:first-child{ border-inline-start:2px solid transparent; transition:border-color var(--dur) var(--ease); }
+  tbody tr:hover{ background:var(--bg-surface-alt); }
+  tbody tr:hover td:first-child{ border-inline-start-color:var(--brand); }
+  tbody tr:hover .row-actions{ opacity:1; transform:translateX(0); }
+  [dir="rtl"] tbody tr:hover .row-actions{ transform:translateX(0); }
+  .cell-name{ font-weight:600; display:flex; align-items:center; gap:9px; }
+  .cell-avatar{ width:28px; height:28px; border-radius:8px; flex-shrink:0; background:var(--p-100); color:var(--p-700); display:flex; align-items:center; justify-content:center; font-weight:700; font-family:var(--font-display); font-size:10.5px; }
+  .cell-name-meta{ line-height:1.3; font-weight:600; }
+  .cell-sub{ font-size:11.5px; color:var(--text-secondary); margin-top:1px; font-weight:500; }
+  .row-actions{ display:flex; gap:4px; opacity:0; transform:translateX(6px); transition:all var(--dur) var(--ease); justify-content:flex-end; }
+  [dir="rtl"] .row-actions{ transform:translateX(-6px); }
+  .row-actions .icon-btn{ width:28px; height:28px; }
+  .row-actions .icon-btn svg{ width:14px; height:14px; }
+
+  .table-toolbar{ display:flex; align-items:center; gap:var(--sp-4); padding:var(--sp-4) var(--sp-5); flex-wrap:wrap; border-bottom:1px solid var(--border-subtle); }
+  .table-search{ display:flex; align-items:center; gap:8px; padding:9px 13px; border-radius:var(--r-md); background:var(--bg-surface-alt); color:var(--text-secondary); font-size:12.5px; cursor:pointer; transition:all var(--dur) var(--ease); flex:1; min-width:180px; max-width:280px; border:1px solid transparent; }
+  .table-search:hover{ border-color:var(--brand); color:var(--text-primary); }
+  .table-search i{ width:15px; height:15px; flex-shrink:0; }
+  .table-filters{ display:flex; gap:6px; }
+  .filter-chip{ font-size:12px; font-weight:600; padding:7px 13px; border-radius:var(--r-full); color:var(--text-secondary); background:var(--bg-surface-alt); cursor:pointer; transition:all var(--dur) var(--ease); border:1px solid transparent; }
+  .filter-chip:hover{ color:var(--text-primary); }
+  .filter-chip.active{ background:var(--brand-soft); color:var(--brand); border-color:rgba(15,110,100,.16); }
+  .table-toolbar .btn{ margin-inline-start:auto; }
+  .table-pagination{ display:flex; align-items:center; justify-content:space-between; padding:var(--sp-4) var(--sp-5); font-size:12.5px; color:var(--text-secondary); flex-wrap:wrap; gap:var(--sp-3); }
+  .pagination-controls{ display:flex; align-items:center; gap:3px; }
+  .page-btn{ min-width:28px; height:28px; padding:0 6px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:600; color:var(--text-secondary); cursor:pointer; transition:all var(--dur) var(--ease); }
+  .page-btn svg{ width:14px; height:14px; }
+  .page-btn:hover{ background:var(--bg-surface-alt); color:var(--text-primary); }
+  .page-btn.active{ background:linear-gradient(155deg,var(--p-600),var(--brand)); color:#fff; box-shadow:0 3px 10px rgba(15,110,100,.32), inset 0 1px 0 rgba(255,255,255,.18); }
+  .page-btn.disabled{ opacity:.4; cursor:not-allowed; }
+  .page-btn.disabled:hover{ background:transparent; color:var(--text-secondary); }
+
+  @keyframes shimmer{ 0%{ background-position:-300px 0; } 100%{ background-position:300px 0; } }
+  .skel{
+    border-radius:var(--r-sm); background:linear-gradient(90deg, var(--bg-surface-alt) 20%, var(--brand-soft) 50%, var(--bg-surface-alt) 80%);
+    background-size:300px 100%; animation:shimmer 1.6s ease-in-out infinite;
+  }
+  .skel-icon{ width:38px; height:38px; border-radius:var(--r-md); margin-bottom:var(--sp-4); }
+  .skel-value{ width:70px; height:26px; margin-bottom:6px; }
+  .skel-label{ width:110px; height:12px; }
+  .skel-avatar{ width:44px; height:44px; border-radius:var(--r-md); flex-shrink:0; }
+  .skel-line{ height:13px; border-radius:4px; }
+
+  @keyframes fadeRise{ from{ opacity:0; transform:translateY(14px);} to{ opacity:1; transform:translateY(0);} }
+  @keyframes fadeIn{ from{ opacity:0;} to{ opacity:1;} }
+  .page-enter{ animation:fadeRise .5s var(--ease) both; }
+  section.page-enter{ animation:fadeIn .3s var(--ease) both; }
+  section.page-enter .card,
+  section.page-enter .grid-2 > *,
+  section.page-enter .grid-3 > *,
+  section.page-enter .stack > *{ animation:fadeRise .5s var(--ease) both; }
+  section.page-enter .grid-3 > *:nth-child(1),section.page-enter .stack > *:nth-child(1){ animation-delay:.03s; }
+  section.page-enter .grid-3 > *:nth-child(2),section.page-enter .stack > *:nth-child(2){ animation-delay:.09s; }
+  section.page-enter .grid-3 > *:nth-child(3),section.page-enter .stack > *:nth-child(3){ animation-delay:.15s; }
+  section.page-enter .grid-2 > *:nth-child(2){ animation-delay:.07s; }
+
+  .app-header{ display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4); padding:14px var(--sp-5); flex-wrap:wrap; }
+  .app-header-search{
+    display:flex; align-items:center; gap:9px; padding:9px 14px; border-radius:var(--r-full); flex:1; max-width:360px;
+    background:var(--bg-surface-alt); color:var(--text-secondary); font-size:12.5px; cursor:pointer;
+    transition:all var(--dur) var(--ease); border:1px solid transparent;
+  }
+  .app-header-search:hover{ border-color:var(--brand); color:var(--text-primary); }
+  .app-header-search i{ width:15px; height:15px; flex-shrink:0; }
+  .app-header-actions{ display:flex; align-items:center; gap:12px; }
+  .app-header-bell{ position:relative; }
+  .notif-dot{
+    position:absolute; top:-3px; inset-inline-end:-3px; background:var(--error-500); color:#fff; font-size:9px; font-weight:700;
+    width:15px; height:15px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid var(--bg-surface);
+  }
+  .app-header-divider{ width:1px; height:24px; background:var(--border-default); }
+  .app-header-user{ display:flex; align-items:center; gap:9px; cursor:pointer; padding:5px 8px 5px 5px; border-radius:var(--r-full); transition:background var(--dur) var(--ease); }
+  [dir="rtl"] .app-header-user{ padding:5px 5px 5px 8px; }
+  .app-header-user:hover{ background:var(--bg-surface-alt); }
+  .app-header-panel{ border-top:1px solid var(--border-subtle); padding:var(--sp-3) var(--sp-5) var(--sp-4); }
+  .notif-item{ display:flex; gap:12px; padding:11px 6px; border-radius:var(--r-md); transition:background var(--dur) var(--ease); }
+  .notif-item:hover{ background:var(--bg-surface-alt); }
+  .notif-item b{ display:block; font-size:13px; margin-bottom:2px; }
+  .notif-item span{ font-size:12px; color:var(--text-secondary); line-height:1.5; }
+  .notif-icon{ width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .notif-icon i{ width:16px; height:16px; }
+  .notif-icon.success{ background:var(--success-100); color:var(--success-700); }
+  .notif-icon.warning{ background:var(--warning-100); color:var(--warning-700); }
+
+  .nav-demo{ display:flex; border-radius:var(--r-lg); overflow:hidden; border:1px solid var(--border-default); }
+  .nav-demo-side{ width:196px; background:var(--bg-surface); padding:var(--sp-4); flex-shrink:0; border-inline-end:1px solid var(--border-default); }
+  .nav-item{ display:flex; align-items:center; gap:10px; font-size:13px; font-weight:500; color:var(--text-secondary); padding:9px 12px; border-radius:var(--r-md); margin-bottom:3px; transition:all var(--dur) var(--ease); }
+  .nav-item svg{ width:16px; height:16px; flex-shrink:0; }
+  .nav-item:hover{ background:var(--bg-surface-alt); color:var(--text-primary); }
+  .nav-item.active{ background:var(--brand-soft); color:var(--brand); font-weight:700; box-shadow:inset 0 0 0 1px rgba(15,110,100,.12); }
+  .nav-item.active svg{ filter:drop-shadow(0 1px 1px rgba(15,110,100,.25)); }
+  .nav-demo-main{ flex:1; padding:var(--sp-6); background:var(--bg-surface-alt); min-height:200px; }
+
+  .alert{ display:flex; gap:12px; padding:var(--sp-4); border-radius:var(--r-md); font-size:13px; align-items:flex-start; }
+  .alert b{ display:block; font-size:13.5px; margin-bottom:2px; }
+  .alert span.body-text{ display:block; }
+  .alert-success{ background:var(--success-100); color:var(--success-700); }
+  .alert-warning{ background:var(--warning-100); color:var(--warning-700); }
+  .alert-error{ background:var(--error-100); color:var(--error-700); }
+  .alert-info{ background:var(--info-100); color:var(--info-700); }
+
+  .modal-frame{ background:var(--n-900); border-radius:var(--r-xl); padding:var(--sp-10); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:var(--sp-5); }
+  [data-theme="dark"] .modal-frame{ background:#05080f; }
+  .modal-box{ width:380px; background:var(--bg-surface); border-radius:var(--r-xl); box-shadow:var(--shadow-lg); border:1px solid var(--border-subtle); padding:var(--sp-6); animation:modalIn .5s var(--ease); position:relative; }
+  .modal-close{ position:absolute; top:16px; inset-inline-end:16px; width:26px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); cursor:pointer; transition:all var(--dur) var(--ease); }
+  .modal-close:hover{ background:var(--bg-surface-alt); color:var(--text-primary); }
+  .modal-close svg{ width:14px; height:14px; }
+  .modal-icon{ width:44px; height:44px; border-radius:12px; background:var(--error-100); color:var(--error-700); display:flex; align-items:center; justify-content:center; margin-bottom:var(--sp-4); }
+  .modal-icon svg{ width:22px; height:22px; }
+  @keyframes modalIn{ from{ opacity:0; transform:scale(.93) translateY(10px);} to{ opacity:1; transform:scale(1) translateY(0);} }
+  .modal-box h3{ font-size:16px; margin-bottom:6px; }
+  .modal-box p{ font-size:13px; color:var(--text-secondary); margin-bottom:var(--sp-5); line-height:1.55; }
+  .modal-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:var(--sp-6); }
+
+  code.tok{ font-family:var(--font-mono); font-size:12px; background:var(--bg-surface-alt); padding:2px 6px; border-radius:4px; }
+
+  .empty-state{ padding:var(--sp-8) var(--sp-6); display:flex; flex-direction:column; align-items:center; text-align:center; gap:5px; }
+  .empty-icon{ width:56px; height:56px; border-radius:var(--r-lg); background:var(--bg-surface-alt); color:var(--text-secondary); display:flex; align-items:center; justify-content:center; margin-bottom:var(--sp-2); transition:transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); box-shadow:0 0 0 6px color-mix(in srgb, var(--bg-surface-alt) 60%, transparent); }
+  .empty-state:hover .empty-icon{ transform:translateY(-3px); box-shadow:0 0 0 8px var(--brand-soft); color:var(--brand); }
+  .empty-icon svg,.empty-icon i{ width:24px; height:24px; }
+  .empty-title{ font-family:var(--font-display); font-size:15px; font-weight:700; color:var(--ink); }
+  .empty-desc{ font-size:12.5px; color:var(--text-secondary); max-width:280px; line-height:1.6; margin-bottom:var(--sp-3); }
+
+  @media (max-width: 900px){
+    .sidenav{ display:none; }
+    main{ padding:var(--sp-6); }
+    .grid-2,.grid-3{ grid-template-columns:1fr 1fr; }
+    .nav-demo{ flex-direction:column; }
+    .nav-demo-side{ width:100%; border-inline-end:none; border-bottom:1px solid var(--border-default); }
+    .section-head{ padding-inline-start:0; }
+    .section-head::before{ display:none; }
+    .page-title{ padding-inline-start:16px; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <aside class="sidenav" id="sidenav">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#fff" stroke-linecap="round">
+          <path d="M6 5.2C8 4 10 3.2 12 3.2s4 .8 6 2C18 12 15.5 18 12 20.8 8.5 18 6 12 6 5.2Z" stroke-width="1.5" opacity=".5"/>
+          <path d="M12 9v6.2M8.9 12.1h6.2" stroke-width="2.2"/>
+        </svg>
+      </div>
+      <div class="sidenav-text">
+        <div class="brand-name">MediCare Center</div>
+        <div class="brand-sub" data-i18n="brand_sub">Design System v1.0</div>
+      </div>
+      <div class="collapse-btn" id="collapseBtn"><i data-lucide="panel-left-close"></i></div>
+    </div>
+    <div class="workspace-tag sidenav-text">Baghdad · Main Branch</div>
+
+    <div class="search-bar">
+      <i data-lucide="search"></i>
+      <span class="sidenav-text" data-i18n="search_placeholder">Search...</span>
+      <kbd class="sidenav-text">⌘K</kbd>
+    </div>
+
+    <div class="nav-scroll">
+      <div class="nav-group-label sidenav-text" data-i18n="grp_foundations">Foundations</div>
+      <nav>
+        <a href="#colors" title="Colors"><i data-lucide="palette"></i><span class="sidenav-text" data-i18n="nav_colors">Colors</span></a>
+        <a href="#typography" title="Typography"><i data-lucide="type"></i><span class="sidenav-text" data-i18n="nav_typography">Typography</span></a>
+        <a href="#spacing" title="Spacing"><i data-lucide="ruler"></i><span class="sidenav-text" data-i18n="nav_spacing">Spacing &amp; Radius</span></a>
+        <a href="#elevation" title="Elevation"><i data-lucide="layers"></i><span class="sidenav-text" data-i18n="nav_elevation">Elevation</span></a>
+      </nav>
+      <div class="nav-group-label sidenav-text" data-i18n="grp_components">Components</div>
+      <nav>
+        <a href="#buttons" title="Buttons"><i data-lucide="mouse-pointer-click"></i><span class="sidenav-text" data-i18n="nav_buttons">Buttons</span></a>
+        <a href="#forms" title="Forms"><i data-lucide="square-pen"></i><span class="sidenav-text" data-i18n="nav_forms">Form Controls</span></a>
+        <a href="#badges" title="Badges"><i data-lucide="shield-check"></i><span class="sidenav-text" data-i18n="nav_badges">Status Badges</span></a>
+        <a href="#cards" title="Cards"><i data-lucide="layout-panel-top"></i><span class="sidenav-text" data-i18n="nav_cards">Cards</span></a>
+        <a href="#table" title="Data Table"><i data-lucide="table"></i><span class="sidenav-text" data-i18n="nav_table">Data Table</span></a>
+        <a href="#header" title="Header"><i data-lucide="app-window"></i><span class="sidenav-text" data-i18n="nav_header">App Header</span></a>
+        <a href="#navigation" title="Navigation"><i data-lucide="menu"></i><span class="sidenav-text" data-i18n="nav_navigation">Navigation</span></a>
+        <a href="#alerts" title="Alerts"><i data-lucide="triangle-alert"></i><span class="sidenav-text" data-i18n="nav_alerts">Alerts</span></a>
+        <a href="#modal" title="Modal"><i data-lucide="square"></i><span class="sidenav-text" data-i18n="nav_modal">Modal</span></a>
+        <a href="#loading" title="Loading states"><i data-lucide="loader-circle"></i><span class="sidenav-text" data-i18n="nav_loading">Loading States</span></a>
+        <a href="#empty" title="Empty states"><i data-lucide="inbox"></i><span class="sidenav-text" data-i18n="nav_empty">Empty States</span></a>
+      </nav>
+      <div class="nav-group-label sidenav-text" data-i18n="grp_localization">Localization</div>
+      <nav>
+        <a href="#rtl" title="RTL"><i data-lucide="globe"></i><span class="sidenav-text" data-i18n="nav_rtl">RTL / Localization</span></a>
+      </nav>
+    </div>
+
+    <div class="sidenav-footer">
+      <div class="user-avatar">AT</div>
+      <div class="user-meta">
+        <div class="user-name" data-i18n="user_name">Ahmed Al-Tamimi</div>
+        <div class="user-role" data-i18n="user_role">System Admin</div>
+      </div>
+      <div class="icon-btn sidenav-text"><i data-lucide="settings"></i></div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div>
+        <div class="breadcrumb"><span>MediCare Center</span><span class="sep icon-mirror">›</span><span class="current" data-i18n="breadcrumb_current">Design System</span></div>
+        <div class="page-title" data-i18n="page_title">Design System</div>
+        <div class="page-desc" data-i18n="page_desc">Modern, premium, minimal healthcare SaaS visual language — built for light &amp; dark themes with full LTR / RTL support.</div>
+      </div>
+      <div class="toggles">
+        <button class="toggle-btn" id="themeToggle"><span id="themeIcon">🌙</span> <span id="themeLabel">Dark mode</span></button>
+        <button class="toggle-btn" id="dirToggle">🔤 <span id="dirLabel">العربية (RTL)</span></button>
+      </div>
+    </div>
+
+    <section id="colors">
+      <div class="section-head">
+        <div class="section-eyebrow" data-i18n="eyebrow_foundations">Foundations</div>
+        <div class="section-title" data-i18n="sec_colors_title">Color</div>
+        <div class="section-note" data-i18n="sec_colors_note">Clinical Teal is the brand core — trustworthy without being sterile. Amber is reserved for highlights, never primary actions. Semantic colors are kept visually distinct from the brand teal to avoid ambiguity in clinical contexts.</div>
+      </div>
+      <div class="palette-group">
+        <div class="palette-label" data-i18n="pal_primary">Primary — Clinical Teal</div>
+        <div class="swatch-grid" id="paletteP"></div>
+      </div>
+      <div class="palette-group">
+        <div class="palette-label" data-i18n="pal_accent">Accent — Amber (sparing use)</div>
+        <div class="swatch-grid" id="paletteA"></div>
+      </div>
+      <div class="palette-group">
+        <div class="palette-label" data-i18n="pal_semantic">Semantic</div>
+        <div class="swatch-grid" id="paletteS"></div>
+      </div>
+      <div class="palette-group">
+        <div class="palette-label" data-i18n="pal_neutral">Neutral — Slate</div>
+        <div class="swatch-grid" id="paletteN"></div>
+      </div>
+    </section>
+
+    <section id="typography">
+      <div class="section-head">
+        <div class="section-eyebrow" data-i18n="eyebrow_foundations">Foundations</div>
+        <div class="section-title" data-i18n="sec_type_title">Typography</div>
+        <div class="section-note" data-i18n="sec_type_note">Rubik is used across every weight, for both English and Arabic — one unified typographic voice with no visible shift when switching direction. IBM Plex Mono is reserved for data: amounts, IDs, timestamps.</div>
+      </div>
+      <div class="card pad">
+        <div class="type-row"><span class="font-display" style="font-size:40px;font-weight:800;">Display XL</span><span class="type-meta">40 / 48 · 800</span></div>
+        <div class="type-row"><span class="font-display" style="font-size:32px;font-weight:700;">Display L</span><span class="type-meta">32 / 40 · 700</span></div>
+        <div class="type-row"><span class="font-display" style="font-size:26px;font-weight:700;">Heading 1</span><span class="type-meta">26 / 34 · 700</span></div>
+        <div class="type-row"><span class="font-display" style="font-size:20px;font-weight:700;">Heading 2</span><span class="type-meta">20 / 28 · 700</span></div>
+        <div class="type-row"><span class="font-display" style="font-size:16px;font-weight:600;">Heading 3</span><span class="type-meta">16 / 24 · 600</span></div>
+        <div class="type-row"><span style="font-size:16px;">Body Large — patient-facing copy</span><span class="type-meta">16 / 24 · 400</span></div>
+        <div class="type-row"><span style="font-size:14px;">Body — default UI text</span><span class="type-meta">14 / 22 · 400</span></div>
+        <div class="type-row"><span style="font-size:12px;color:var(--text-secondary);">Caption — hints, timestamps</span><span class="type-meta">12 / 18 · 500</span></div>
+        <div class="type-row"><span class="mono" style="font-size:13px;">INV-2026-00842 · IQD 45,000</span><span class="type-meta">Mono · data &amp; identifiers</span></div>
+        <div class="type-row"><span dir="rtl" style="font-size:18px;font-weight:700;font-family:'Rubik';">حجز موعد جديد</span><span class="type-meta">Rubik · Arabic</span></div>
+      </div>
+    </section>
+
+    <section id="spacing">
+      <div class="section-head">
+        <div class="section-eyebrow" data-i18n="eyebrow_foundations">Foundations</div>
+        <div class="section-title" data-i18n="sec_spacing_title">Spacing &amp; Radius</div>
+        <div class="section-note" data-i18n="sec_spacing_note">4px base unit. Radius scale moves from tight (inputs) to soft (cards/modals) — rounded but never bubbly.</div>
+      </div>
+      <div class="grid-2">
+        <div class="card pad">
+          <div style="font-size:12.5px;font-weight:700;margin-bottom:14px;color:var(--text-secondary);" data-i18n="lbl_spacing_scale">SPACING SCALE</div>
+          <div class="scale-row"><span class="scale-label">--sp-1 · 4px</span><div class="scale-bar" style="width:4px;"></div></div>
+          <div class="scale-row"><span class="scale-label">--sp-2 · 8px</span><div class="scale-bar" style="width:8px;"></div></div>
+          <div class="scale-row"><span class="scale-label">--sp-3 · 12px</span><div class="scale-bar" style="width:12px;"></div></div>
+          <div class="scale-row"><span class="scale-label">--sp-4 · 16px</span><div class="scale-bar" style="width:16px;"></div></div>
+          <div class="scale-row"><span class="scale-label">--sp-6 · 24px</span><div class="scale-bar" style="width:24px;"></div></div>
+          <div class="scale-row"><span class="scale-label">--sp-8 · 32px</span><div class="scale-bar" style="width:32px;"></div></div>
+          <div class="scale-row"><span class="scale-label">--sp-12 · 48px</span><div class="scale-bar" style="width:48px;"></div></div>
+          <div class="scale-row"><span class="scale-label">--sp-16 · 64px</span><div class="scale-bar" style="width:64px;"></div></div>
+        </div>
+        <div class="card pad">
+          <div style="font-size:12.5px;font-weight:700;margin-bottom:14px;color:var(--text-secondary);" data-i18n="lbl_radius_scale">RADIUS SCALE</div>
+          <div class="scale-row"><span class="scale-label">--r-sm · 6px</span><div class="radius-demo" style="border-radius:6px;"></div></div>
+          <div class="scale-row"><span class="scale-label">--r-md · 10px</span><div class="radius-demo" style="border-radius:10px;"></div></div>
+          <div class="scale-row"><span class="scale-label">--r-lg · 14px</span><div class="radius-demo" style="border-radius:14px;"></div></div>
+          <div class="scale-row"><span class="scale-label">--r-xl · 20px</span><div class="radius-demo" style="border-radius:20px;"></div></div>
+          <div class="scale-row"><span class="scale-label">--r-full · pill</span><div class="radius-demo" style="border-radius:999px;"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="elevation">
+      <div class="section-head">
+        <div class="section-eyebrow" data-i18n="eyebrow_foundations">Foundations</div>
+        <div class="section-title" data-i18n="sec_elevation_title">Elevation</div>
+        <div class="section-note" data-i18n="sec_elevation_note">Shadows are tinted with the brand teal rather than pure black — a quiet signature that ties every elevated surface back to the palette. Hover any card on this page to feel it.</div>
+      </div>
+      <div class="row" style="gap:32px;">
+        <div class="elevation-demo" style="box-shadow:var(--shadow-sm);">shadow-sm</div>
+        <div class="elevation-demo" style="box-shadow:var(--shadow-md);">shadow-md</div>
+        <div class="elevation-demo" style="box-shadow:var(--shadow-lg);">shadow-lg</div>
+      </div>
+    </section>
+
+    <section id="buttons">
+      <div class="section-head">
+        <div class="section-eyebrow" data-i18n="eyebrow_components">Components</div>
+        <div class="section-title" data-i18n="sec_buttons_title">Buttons</div>
+      </div>
+      <div class="card pad stack">
+        <div class="row">
+          <button class="btn btn-primary" data-i18n="btn_confirm">Confirm Appointment</button>
+          <button class="btn btn-secondary" data-i18n="btn_view">View Details</button>
+          <button class="btn btn-outline" data-i18n="btn_reschedule">Reschedule</button>
+          <button class="btn btn-ghost" data-i18n="btn_cancel">Cancel</button>
+          <button class="btn btn-danger" data-i18n="btn_delete">Delete Record</button>
+          <button class="btn btn-primary" disabled data-i18n="btn_disabled">Disabled</button>
+        </div>
+        <div class="row">
+          <button class="btn btn-primary btn-sm" data-i18n="btn_small_primary">Small primary</button>
+          <button class="btn btn-outline btn-sm" data-i18n="btn_small_outline">Small outline</button>
+          <button class="btn btn-icon btn-outline">＋</button>
+          <button class="btn btn-icon btn-primary">✓</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="forms">
+      <div class="section-head">
+        <div class="section-eyebrow" data-i18n="eyebrow_components">Components</div>
+        <div class="section-title" data-i18n="sec_forms_title">Form Controls</div>
+      </div>
+      <div class="card pad">
+        <div class="grid-2">
+          <div class="field">
+            <label data-i18n="form_name_label">Patient full name</label>
+            <input class="input" data-i18n-ph="form_name_ph" placeholder="e.g. Layla Hassan">
+          </div>
+          <div class="field">
+            <label data-i18n="form_dept_label">Department</label>
+            <select class="input">
+              <option data-i18n="form_dept_cardio">Cardiology</option>
+              <option data-i18n="form_dept_derma">Dermatology</option>
+              <option data-i18n="form_dept_pedia">Pediatrics</option>
+            </select>
+          </div>
+          <div class="field">
+            <label data-i18n="form_id_label">National ID</label>
+            <input class="input input-error" value="19023" placeholder="00000000000">
+            <span class="error-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span data-i18n="form_id_error">Must be 12 digits</span></span>
+          </div>
+          <div class="field">
+            <label data-i18n="form_phone_label">Phone number</label>
+            <input class="input input-success" value="+964 750 123 4567">
+            <span class="success-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="form_phone_valid">Looks good</span></span>
+          </div>
+          <div class="field">
+            <label data-i18n="form_notes_label">Notes</label>
+            <textarea class="input" data-i18n-ph="form_notes_ph" placeholder="Reason for visit..."></textarea>
+          </div>
+        </div>
+        <div class="row" style="margin-top:var(--sp-6);">
+          <label class="checkbox-row"><input type="checkbox" checked> <span data-i18n="form_email_confirm">Send email confirmation</span></label>
+          <label class="radio-row"><input type="radio" name="r" checked> <span data-i18n="form_morning">Morning</span></label>
+          <label class="radio-row"><input type="radio" name="r"> <span data-i18n="form_evening">Evening</span></label>
+          <label class="checkbox-row"><span class="switch"><input type="checkbox" checked><span class="switch-track"></span></span> <span data-i18n="form_sms">SMS reminders</span></label>
+        </div>
+      </div>
+    </section>
+
+    <section id="badges">
+      <div class="section-head">
+        <div class="section-eyebrow" data-i18n="eyebrow_components">Components</div>
+        <div class="section-title" data-i18n="sec_badges_title">Status Badges</div>
+        <div class="section-note" data-i18n="sec_badges_note">Consistent semantic mapping used everywhere appointments, invoices, or records appear — patients and staff learn the color code once.</div>
+      </div>
+      <div class="card pad row">
+        <span class="badge badge-confirmed" data-i18n="badge_confirmed">Confirmed</span>
+        <span class="badge badge-pending" data-i18n="badge_pending">Pending</span>
+        <span class="badge badge-cancelled" data-i18n="badge_cancelled">Cancelled</span>
+        <span class="badge badge-completed" data-i18n="badge_completed">Completed</span>
+        <span class="badge badge-info" data-i18n="badge_noshow">No-show</span>
+      </div>
+    </section>
+
+    <section id="cards">
+      <div class="section-head">
+        <div class="section-eyebrow" data-i18n="eyebrow_components">Components</div>
+        <div class="section-title" data-i18n="sec_cards_title">Cards</div>
+        <div class="section-note" data-i18n="sec_cards_note">Signature pattern: clinical entity cards carry a 4px status-colored accent edge and lift gently on hover — encoding real state at a glance, not decoration.</div>
+      </div>
+
+      <div class="grid-3" style="margin-bottom:var(--sp-5);">
+        <div class="card stat-card">
+          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 3v3M16 3v3"/></svg></div>
+          <div class="stat-value">128</div>
+          <div class="stat-label" data-i18n="stat_appts_label">Appointments today</div>
+          <div class="stat-delta stat-up" data-i18n="stat_delta_week">▲ 12% vs last week</div>
+          <div class="sparkline"><span style="height:35%"></span><span style="height:55%"></span><span style="height:40%"></span><span style="height:70%"></span><span style="height:50%"></span><span style="height:85%"></span><span style="height:100%"></span></div>
+        </div>
+        <div class="card stat-card featured">
+          <span class="featured-tag" data-i18n="featured_tag">TODAY</span>
+          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2.5" y="6" width="19" height="13" rx="2"/><path d="M2.5 10.5h19"/></svg></div>
+          <div class="stat-value">6.4M</div>
+          <div class="stat-label" data-i18n="stat_revenue_label">Revenue today (IQD)</div>
+          <div class="stat-delta stat-up" data-i18n="stat_delta_week2">▲ 4% vs last week</div>
+          <div class="sparkline"><span style="height:45%"></span><span style="height:30%"></span><span style="height:60%"></span><span style="height:50%"></span><span style="height:75%"></span><span style="height:65%"></span><span style="height:100%"></span></div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5 5 0 0 0-7.1 0L12 6.3l-1.7-1.7a5 5 0 1 0-7.1 7.1L12 20.4l8.8-8.7a5 5 0 0 0 0-7.1Z"/></svg></div>
+          <div class="stat-value">14</div>
+          <div class="stat-label" data-i18n="stat_doctors_label">Doctors on duty</div>
+          <div class="stat-delta" style="color:var(--text-secondary);" data-i18n="stat_delta_same">Same as yesterday</div>
+          <div class="sparkline"><span style="height:60%"></span><span style="height:60%"></span><span style="height:55%"></span><span style="height:65%"></span><span style="height:58%"></span><span style="height:62%"></span><span style="height:60%"></span></div>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="card accent-card status-confirmed">
+          <div class="avatar">LH</div>
+          <div style="flex:1;">
+            <div class="ac-title" data-i18n="ac1_title">Layla Hassan → Dr. Ahmed Karim</div>
+            <div class="ac-sub" data-i18n="ac1_sub">Cardiology · Follow-up consultation</div>
+            <div class="ac-meta"><span>Aug 9, 10:30 AM</span><span>#APT-2026-3391</span></div>
+          </div>
+          <span class="badge badge-confirmed" data-i18n="badge_confirmed">Confirmed</span>
+        </div>
+        <div class="card accent-card status-pending">
+          <div class="avatar">OM</div>
+          <div style="flex:1;">
+            <div class="ac-title" data-i18n="ac2_title">Omar Mansour → Dr. Sara Nabil</div>
+            <div class="ac-sub" data-i18n="ac2_sub">Dermatology · New patient</div>
+            <div class="ac-meta"><span>Aug 9, 1:00 PM</span><span>#APT-2026-3402</span></div>
+          </div>
+          <span class="badge badge-pending" data-i18n="badge_pending">Pending</span>
+        </div>
+        <div class="card accent-card status-cancelled">
+          <div class="avatar">RJ</div>
+          <div style="flex:1;">
+            <div class="ac-title" data-i18n="ac3_title">Rana Jabbar → Dr. Ahmed Karim</div>
+            <div class="ac-sub" data-i18n="ac3_sub">Cardiology · Routine check-up</div>
+            <div class="ac-meta"><span>Aug 8, 4:00 PM</span><span>#APT-2026-3388</span></div>
+          </div>
+          <span class="badge badge-cancelled" data-i18n="badge_cancelled">Cancelled</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="table">
+      <div class="section-head">
+        <div class="section-eyebrow" data-i18n="eyebrow_components">Components</div>
+        <div class="section-title" data-i18n="sec_table_title">Data Table</div>
+      </div>
+      <div class="card" style="overflow:hidden;">
+        <div class="table-toolbar">
+          <div class="table-search"><i data-lucide="search"></i><span data-i18n="table_search_ph">Search appointments...</span></div>
+          <div class="table-filters">
+            <span class="filter-chip active" data-i18n="filter_all">All</span>
+            <span class="filter-chip" data-i18n="filter_today">Today</span>
+            <span class="filter-chip" data-i18n="filter_week">This week</span>
+          </div>
+          <button class="btn btn-outline btn-sm"><i data-lucide="download" style="width:14px;height:14px;"></i> <span data-i18n="table_export">Export</span></button>
+        </div>
+        <table>
+          <thead>
+            <tr><th data-i18n="th_patient">Patient</th><th data-i18n="th_doctor">Doctor</th><th data-i18n="th_dept">Department</th><th data-i18n="th_date">Date</th><th data-i18n="th_status">Status</th><th data-i18n="th_amount">Amount</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="cell-name"><div class="cell-avatar">LH</div><div class="cell-name-meta"><div data-i18n="row1_name">Layla Hassan</div><div class="cell-sub">PT-00931</div></div></div></td>
+              <td data-i18n="row1_doctor">Dr. Ahmed Karim</td><td data-i18n="row1_dept">Cardiology</td><td class="mono">Aug 9, 10:30</td>
+              <td><span class="badge badge-confirmed" data-i18n="badge_confirmed">Confirmed</span></td>
+              <td class="mono">45,000</td>
+              <td><div class="row-actions"><span class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5c-5 0-8.5 4.5-9.5 7 1 2.5 4.5 7 9.5 7s8.5-4.5 9.5-7c-1-2.5-4.5-7-9.5-7Z"/><circle cx="12" cy="12" r="2.6"/></svg></span><span class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg></span></div></td>
+            </tr>
+            <tr>
+              <td><div class="cell-name"><div class="cell-avatar">OM</div><div class="cell-name-meta"><div data-i18n="row2_name">Omar Mansour</div><div class="cell-sub">PT-00944</div></div></div></td>
+              <td data-i18n="row2_doctor">Dr. Sara Nabil</td><td data-i18n="row2_dept">Dermatology</td><td class="mono">Aug 9, 13:00</td>
+              <td><span class="badge badge-pending" data-i18n="badge_pending">Pending</span></td>
+              <td class="mono">35,000</td>
+              <td><div class="row-actions"><span class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5c-5 0-8.5 4.5-9.5 7 1 2.5 4.5 7 9.5 7s8.5-4.5 9.5-7c-1-2.5-4.5-7-9.5-7Z"/><circle cx="12" cy="12" r="2.6"/></svg></span><span class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg></span></div></td>
+            </tr>
+            <tr>
+              <td><div class="cell-name"><div class="cell-avatar">RJ</div><div class="cell-name-meta"><div data-i18n="row3_name">Rana Jabbar</div><div class="cell-sub">PT-00877</div></div></div></td>
+              <td data-i18n="row3_doctor">Dr. Ahmed Karim</td><td data-i18n="row3_dept">Cardiology</td><td class="mono">Aug 8, 16:00</td>
+              <td><span class="badge badge-cancelled" data-i18n="badge_cancelled">Cancelled</span></td>
+              <td class="mono">0</td>
+              <td><div class="row-actions"><span class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5c-5 0-8.5 4.5-9.5 7 1 2.5 4.5 7 9.5 7s8.5-4.5 9.5-7c-1-2.5-4.5-7-9.5-7Z"/><circle cx="12" cy="12" r="2.6"/></svg></span><span class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg></span></div></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="table-pagination">
+          <span data-i18n="pagination_showing">Showing 1–3 of 128</span>
+          <div class="pagination-controls">
+            <span class="page-btn disabled"><i data-lucide="chevron-left" class="icon-mirror"></i></span>
+            <span class="page-btn active">1</span>
+            <span class="page-btn">2</span>
+            <span class="page-btn">3</span>
+            <span class="page-btn">…</span>
+            <span class="page-btn">43</span>
+            <span class="page-btn"><i data-lucide="chevron-right" class="icon-mirror"></i></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="header">
+      <div class="section-head">
+        <div class="section-eyebrow" data-i18n="eyebrow_components">Components</div>
+        <div class="section-title" data-i18n="sec_header_title">App Header</div>
+        <div class="section-note" data-i18n="sec_header_note">The bar every internal page sits under — quick search, live notifications, and account access, always in the same place.</div>
+      </div>
+      <div class="card" style="overflow:visible;">
+        <div class="app-header">
+          <div class="app-header-search">
+            <i data-lucide="search"></i>
+            <span data-i18n="header_search_ph">Search patients, appointments, invoices...</span>
+          </div>
+          <div class="app-header-actions">
+            <div class="icon-btn app-header-bell">
+              <i data-lucide="bell"></i>
+              <span class="notif-dot">3</span>
+            </div>
+            <div class="app-header-divider"></div>
+            <div class="app-header-user">
+              <div class="user-avatar" style="width:32px;height:32px;font-size:12px;">AT</div>
+              <div>
+                <div class="user-name" style="font-size:12.5px;" data-i18n="user_name">Ahmed Al-Tamimi</div>
+                <div class="user-role" style="font-size:10.5px;" data-i18n="user_role">System Admin</div>
+              </div>
+              <i data-lucide="chevron-down" style="width:14px;height:14px;color:var(--text-secondary);"></i>
+            </div>
+          </div>
+        </div>
+        <div class="app-header-panel">
+          <div class="notif-item">
+            <span class="notif-icon success"><i data-lucide="calendar-check"></i></span>
+            <div><b data-i18n="hdr_notif1_title">New appointment booked</b><span data-i18n="hdr_notif1_body">Omar Mansour booked Dermatology for tomorrow, 1:00 PM</span></div>
+          </div>
+          <div class="notif-item">
+            <span class="notif-icon warning"><i data-lucide="clock-alert"></i></span>
+            <div><b data-i18n="hdr_notif2_title">Reschedule requested</b><span data-i18n="hdr_notif2_body">Rana Jabbar asked to move her Aug 12 appointment</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="navigation">
+      <div class="section-head">
+        <div class="section-eyebrow" data-i18n="eyebrow_components">Components</div>
+        <div class="section-title" data-i18n="sec_nav_title">Navigation</div>
+      </div>
+      <div class="nav-demo">
+        <div class="nav-demo-side">
+          <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg><span data-i18n="nd_dashboard">Dashboard</span></div>
+          <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 3v3M16 3v3"/></svg><span data-i18n="nd_appointments">Appointments</span></div>
+          <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="9" r="2.4"/><path d="M15.5 13.2c2.6.3 4.7 2.5 4.7 5.8"/></svg><span data-i18n="nd_patients">Patients</span></div>
+          <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3v6a3 3 0 0 0 6 0V3"/><path d="M10 12v3a5 5 0 0 0 10 0v-1"/><circle cx="20" cy="7" r="2"/></svg><span data-i18n="nd_doctors">Doctors</span></div>
+          <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2Z"/><path d="M9 7h6M9 11h6"/></svg><span data-i18n="nd_invoices">Invoices</span></div>
+          <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M12 20V4M20 20v-7"/></svg><span data-i18n="nd_reports">Reports</span></div>
+        </div>
+        <div class="nav-demo-main"></div>
+      </div>
+    </section>
+
+    <section id="alerts">
+      <div class="section-head">
+        <div class="section-eyebrow" data-i18n="eyebrow_components">Components</div>
+        <div class="section-title" data-i18n="sec_alerts_title">Alerts</div>
+      </div>
+      <div class="stack">
+        <div class="card alert alert-success"><span>✅</span><div><b data-i18n="alert1_title">Appointment confirmed</b><span class="body-text" data-i18n="alert1_body">Layla Hassan is booked with Dr. Ahmed Karim for Aug 9, 10:30 AM.</span></div></div>
+        <div class="card alert alert-warning"><span>⚠️</span><div><b data-i18n="alert2_title">Slot filling up fast</b><span class="body-text" data-i18n="alert2_body">Only 2 slots remain for Dr. Sara Nabil this week.</span></div></div>
+        <div class="card alert alert-error"><span>⛔</span><div><b data-i18n="alert3_title">Cancellation window passed</b><span class="body-text" data-i18n="alert3_body">This appointment can no longer be cancelled online — contact the front desk.</span></div></div>
+        <div class="card alert alert-info"><span>ℹ️</span><div><b data-i18n="alert4_title">New feature</b><span class="body-text" data-i18n="alert4_body">Doctors can now attach lab results directly to patient records.</span></div></div>
+      </div>
+    </section>
+
+    <section id="modal">
+      <div class="section-head">
+        <div class="section-eyebrow" data-i18n="eyebrow_components">Components</div>
+        <div class="section-title" data-i18n="sec_modal_title">Modal / Dialog</div>
+      </div>
+      <div class="modal-frame">
+        <div class="modal-box" id="modalBox">
+          <span class="modal-close">✕</span>
+          <div class="modal-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4M12 17h.01"/></svg></div>
+          <h3 class="font-display" data-i18n="modal_title">Cancel this appointment?</h3>
+          <p data-i18n="modal_body">This will free up the slot for other patients. This action cannot be undone after the 24-hour cutoff.</p>
+          <div class="modal-actions">
+            <button class="btn btn-ghost btn-sm" data-i18n="modal_keep">Keep appointment</button>
+            <button class="btn btn-danger btn-sm" data-i18n="modal_yes_cancel">Yes, cancel</button>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-sm" id="replayBtn" style="color:#fff;border-color:rgba(255,255,255,.25);" data-i18n="replay_btn">↻ Replay entrance animation</button>
+      </div>
+    </section>
+
+    <section id="loading">
+      <div class="section-head">
+        <div class="section-eyebrow" data-i18n="eyebrow_components">Components</div>
+        <div class="section-title" data-i18n="sec_loading_title">Loading States</div>
+        <div class="section-note" data-i18n="sec_loading_note">Skeletons mirror the real layout's shape — stat cards, a table row, an appointment card — so nothing jumps when content arrives. A brief fade-and-rise handles the moment it does.</div>
+      </div>
+      <div class="grid-3" style="margin-bottom:var(--sp-5);">
+        <div class="card stat-card">
+          <div class="skel skel-icon"></div>
+          <div class="skel skel-value"></div>
+          <div class="skel skel-label"></div>
+        </div>
+        <div class="card stat-card">
+          <div class="skel skel-icon"></div>
+          <div class="skel skel-value"></div>
+          <div class="skel skel-label"></div>
+        </div>
+        <div class="card stat-card">
+          <div class="skel skel-icon"></div>
+          <div class="skel skel-value"></div>
+          <div class="skel skel-label"></div>
+        </div>
+      </div>
+      <div class="card accent-card" style="border-inline-start-color:var(--border-default);">
+        <div class="skel skel-avatar"></div>
+        <div style="flex:1;">
+          <div class="skel skel-line" style="width:60%;"></div>
+          <div class="skel skel-line" style="width:40%; margin-top:8px;"></div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:var(--sp-5);">
+        <button class="btn btn-outline btn-sm" id="loadDemoBtn"><i data-lucide="refresh-cw" style="width:14px;height:14px;"></i> <span data-i18n="loading_replay">Replay load-in transition</span></button>
+      </div>
+      <div class="card pad" id="loadedCard" style="margin-top:var(--sp-4); display:none;">
+        <div class="ac-title" data-i18n="ac1_title">Layla Hassan → Dr. Ahmed Karim</div>
+        <div class="ac-sub" data-i18n="ac1_sub">Cardiology · Follow-up consultation</div>
+      </div>
+    </section>
+
+    <section id="empty">
+      <div class="section-head">
+        <div class="section-eyebrow" data-i18n="eyebrow_components">Components</div>
+        <div class="section-title" data-i18n="sec_empty_title">Empty States</div>
+        <div class="section-note" data-i18n="sec_empty_note">Every list, table, and inbox needs a calm answer for "nothing here yet" — an icon, one clear sentence, and a single next action.</div>
+      </div>
+      <div class="grid-2">
+        <div class="card empty-state">
+          <div class="empty-icon"><i data-lucide="calendar-x"></i></div>
+          <div class="empty-title" data-i18n="empty1_title">No appointments today</div>
+          <div class="empty-desc" data-i18n="empty1_desc">This doctor's schedule is clear. New bookings will appear here automatically.</div>
+          <button class="btn btn-secondary btn-sm"><i data-lucide="plus" style="width:14px;height:14px;"></i> <span data-i18n="empty1_cta">Book an appointment</span></button>
+        </div>
+        <div class="card empty-state">
+          <div class="empty-icon"><i data-lucide="search-x"></i></div>
+          <div class="empty-title" data-i18n="empty2_title">No results found</div>
+          <div class="empty-desc" data-i18n="empty2_desc">Try adjusting the filters or search for a different patient name.</div>
+          <button class="btn btn-outline btn-sm" data-i18n="empty2_cta">Clear filters</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="rtl">
+      <div class="section-head">
+        <div class="section-eyebrow" data-i18n="eyebrow_localization">Localization</div>
+        <div class="section-title" data-i18n="sec_rtl_title">RTL / Bilingual Demo</div>
+        <div class="section-note" data-i18n="sec_rtl_note">Logical CSS properties (border-inline-start, margin-inline) are used throughout instead of left/right — the two cards below are pinned to their own direction regardless of the global toggle, so you can compare both at once.</div>
+      </div>
+      <div class="grid-2">
+        <div class="card accent-card status-confirmed" dir="ltr">
+          <div class="avatar">LH</div>
+          <div style="flex:1;">
+            <div class="ac-title">Layla Hassan → Dr. Ahmed Karim</div>
+            <div class="ac-sub">Cardiology · Follow-up consultation</div>
+            <div class="ac-meta"><span>Aug 9, 10:30 AM</span><span>#APT-2026-3391</span></div>
+          </div>
+          <span class="badge badge-confirmed">Confirmed</span>
+        </div>
+        <div class="card accent-card status-confirmed" dir="rtl">
+          <div class="avatar">لح</div>
+          <div style="flex:1;">
+            <div class="ac-title">ليلى حسن ← د. أحمد كريم</div>
+            <div class="ac-sub">أمراض القلب · فحص متابعة</div>
+            <div class="ac-meta"><span>٩ أغسطس، ١٠:٣٠ ص</span><span>#APT-2026-3391</span></div>
+          </div>
+          <span class="badge badge-confirmed">مؤكد</span>
+        </div>
+      </div>
+    </section>
+
+    <div style="text-align:center; padding:var(--sp-10) 0; color:var(--text-secondary); font-size:12.5px;" data-i18n="footer_text">
+      MediCare Center Design System · v1.0 · Built for the frontend implementation phase
+    </div>
+  </main>
+</div>
+
+<script>
+  function swatches(id, entries){
+    document.getElementById(id).innerHTML = entries.map(([name,hex]) =>
+      `<div class="swatch"><div class="swatch-color" style="background:${hex}"></div>
+      <div class="swatch-meta"><div class="swatch-name">${name}</div><div class="swatch-hex">${hex}</div></div></div>`
+    ).join('');
+  }
+  swatches('paletteP', [['primary-50','#F1FAF8'],['primary-100','#DCF3EE'],['primary-200','#B7E6DD'],['primary-300','#8AD6C9'],['primary-400','#4DBFAE'],['primary-500','#16A394'],['primary-600','#128577'],['primary-700 (brand)','#0F6E64'],['primary-800','#0C544D'],['primary-900','#0B3D3A']]);
+  swatches('paletteA', [['accent-400','#F3B65C'],['accent-500','#E8A33D'],['accent-600','#C9822A']]);
+  swatches('paletteS', [['success-500','#16A34A'],['warning-500','#E8A33D'],['error-500','#DC4E4E'],['info-500','#3B82C4']]);
+  swatches('paletteN', [['slate-50','#F8FAFC'],['slate-100','#F1F5F9'],['slate-200','#E2E8F0'],['slate-300','#CBD5E1'],['slate-400','#94A3B8'],['slate-500','#64748B'],['slate-600','#475569'],['slate-700','#334155'],['slate-800','#1F2937'],['slate-900','#111827']]);
+
+  const translations = {
+    en: {
+      brand_sub:"Design System v1.0", grp_foundations:"Foundations", grp_components:"Components", grp_localization:"Localization",
+      nav_colors:"Colors", nav_typography:"Typography", nav_spacing:"Spacing & Radius", nav_elevation:"Elevation",
+      nav_buttons:"Buttons", nav_forms:"Form Controls", nav_badges:"Status Badges", nav_cards:"Cards",
+      nav_table:"Data Table", nav_navigation:"Navigation", nav_alerts:"Alerts", nav_modal:"Modal", nav_rtl:"RTL / Localization",
+      nav_header:"App Header", nav_loading:"Loading States", nav_empty:"Empty States",
+      user_name:"Ahmed Al-Tamimi", user_role:"System Admin", search_placeholder:"Search...", breadcrumb_current:"Design System",
+      page_title:"Design System", page_desc:"Modern, premium, minimal healthcare SaaS visual language — built for light & dark themes with full LTR / RTL support.",
+      eyebrow_foundations:"Foundations", eyebrow_components:"Components", eyebrow_localization:"Localization",
+      sec_colors_title:"Color", sec_colors_note:"Clinical Teal is the brand core — trustworthy without being sterile. Amber is reserved for highlights, never primary actions. Semantic colors are kept visually distinct from the brand teal to avoid ambiguity in clinical contexts.",
+      pal_primary:"Primary — Clinical Teal", pal_accent:"Accent — Amber (sparing use)", pal_semantic:"Semantic", pal_neutral:"Neutral — Slate",
+      lbl_spacing_scale:"SPACING SCALE", lbl_radius_scale:"RADIUS SCALE",
+      sec_type_title:"Typography", sec_type_note:"Rubik is used across every weight, for both English and Arabic — one unified typographic voice with no visible shift when switching direction. IBM Plex Mono is reserved for data: amounts, IDs, timestamps.",
+      sec_spacing_title:"Spacing & Radius", sec_spacing_note:"4px base unit. Radius scale moves from tight (inputs) to soft (cards/modals) — rounded but never bubbly.",
+      sec_elevation_title:"Elevation", sec_elevation_note:"Shadows are tinted with the brand teal rather than pure black — a quiet signature that ties every elevated surface back to the palette. Hover any card on this page to feel it.",
+      sec_buttons_title:"Buttons",
+      sec_forms_title:"Form Controls",
+      sec_badges_title:"Status Badges", sec_badges_note:"Consistent semantic mapping used everywhere appointments, invoices, or records appear — patients and staff learn the color code once.",
+      sec_cards_title:"Cards", sec_cards_note:"Signature pattern: clinical entity cards carry a 4px status-colored accent edge and lift gently on hover — encoding real state at a glance, not decoration.",
+      sec_table_title:"Data Table", sec_nav_title:"Navigation", sec_alerts_title:"Alerts", sec_modal_title:"Modal / Dialog",
+      table_search_ph:"Search appointments...", filter_all:"All", filter_today:"Today", filter_week:"This week",
+      table_export:"Export", pagination_showing:"Showing 1–3 of 128",
+      sec_header_title:"App Header", sec_header_note:"The bar every internal page sits under — quick search, live notifications, and account access, always in the same place.",
+      sec_loading_title:"Loading States", sec_loading_note:"Skeletons mirror the real layout's shape — stat cards, a table row, an appointment card — so nothing jumps when content arrives. A brief fade-and-rise handles the moment it does.",
+      sec_empty_title:"Empty States", sec_empty_note:"Every list, table, and inbox needs a calm answer for \"nothing here yet\" — an icon, one clear sentence, and a single next action.",
+      empty1_title:"No appointments today", empty1_desc:"This doctor's schedule is clear. New bookings will appear here automatically.", empty1_cta:"Book an appointment",
+      empty2_title:"No results found", empty2_desc:"Try adjusting the filters or search for a different patient name.", empty2_cta:"Clear filters",
+      header_search_ph:"Search patients, appointments, invoices...",
+      hdr_notif1_title:"New appointment booked", hdr_notif1_body:"Omar Mansour booked Dermatology for tomorrow, 1:00 PM",
+      hdr_notif2_title:"Reschedule requested", hdr_notif2_body:"Rana Jabbar asked to move her Aug 12 appointment",
+      loading_replay:"Replay load-in transition", featured_tag:"TODAY", form_phone_label:"Phone number", form_phone_valid:"Looks good",
+      sec_rtl_title:"RTL / Bilingual Demo", sec_rtl_note:"Logical CSS properties (border-inline-start, margin-inline) are used throughout instead of left/right — the two cards below are pinned to their own direction regardless of the global toggle, so you can compare both at once.",
+      btn_confirm:"Confirm Appointment", btn_view:"View Details", btn_reschedule:"Reschedule", btn_cancel:"Cancel",
+      btn_delete:"Delete Record", btn_disabled:"Disabled", btn_small_primary:"Small primary", btn_small_outline:"Small outline",
+      form_name_label:"Patient full name", form_name_ph:"e.g. Layla Hassan", form_dept_label:"Department",
+      form_dept_cardio:"Cardiology", form_dept_derma:"Dermatology", form_dept_pedia:"Pediatrics",
+      form_id_label:"National ID", form_id_error:"Must be 12 digits", form_notes_label:"Notes", form_notes_ph:"Reason for visit...",
+      form_email_confirm:"Send email confirmation", form_morning:"Morning", form_evening:"Evening", form_sms:"SMS reminders",
+      badge_confirmed:"Confirmed", badge_pending:"Pending", badge_cancelled:"Cancelled", badge_completed:"Completed", badge_noshow:"No-show",
+      stat_appts_label:"Appointments today", stat_revenue_label:"Revenue today (IQD)", stat_doctors_label:"Doctors on duty",
+      stat_delta_week:"▲ 12% vs last week", stat_delta_week2:"▲ 4% vs last week", stat_delta_same:"Same as yesterday",
+      ac1_title:"Layla Hassan → Dr. Ahmed Karim", ac1_sub:"Cardiology · Follow-up consultation",
+      ac2_title:"Omar Mansour → Dr. Sara Nabil", ac2_sub:"Dermatology · New patient",
+      ac3_title:"Rana Jabbar → Dr. Ahmed Karim", ac3_sub:"Cardiology · Routine check-up",
+      th_patient:"Patient", th_doctor:"Doctor", th_dept:"Department", th_date:"Date", th_status:"Status", th_amount:"Amount",
+      row1_name:"Layla Hassan", row1_doctor:"Dr. Ahmed Karim", row1_dept:"Cardiology",
+      row2_name:"Omar Mansour", row2_doctor:"Dr. Sara Nabil", row2_dept:"Dermatology",
+      row3_name:"Rana Jabbar", row3_doctor:"Dr. Ahmed Karim", row3_dept:"Cardiology",
+      nd_dashboard:"Dashboard", nd_appointments:"Appointments", nd_patients:"Patients", nd_doctors:"Doctors", nd_invoices:"Invoices", nd_reports:"Reports",
+      alert1_title:"Appointment confirmed", alert1_body:"Layla Hassan is booked with Dr. Ahmed Karim for Aug 9, 10:30 AM.",
+      alert2_title:"Slot filling up fast", alert2_body:"Only 2 slots remain for Dr. Sara Nabil this week.",
+      alert3_title:"Cancellation window passed", alert3_body:"This appointment can no longer be cancelled online — contact the front desk.",
+      alert4_title:"New feature", alert4_body:"Doctors can now attach lab results directly to patient records.",
+      modal_title:"Cancel this appointment?", modal_body:"This will free up the slot for other patients. This action cannot be undone after the 24-hour cutoff.",
+      modal_keep:"Keep appointment", modal_yes_cancel:"Yes, cancel", replay_btn:"↻ Replay entrance animation",
+      footer_text:"MediCare Center Design System · v1.0 · Built for the frontend implementation phase"
+    },
+    ar: {
+      brand_sub:"نظام التصميم - الإصدار 1.0", grp_foundations:"الأساسيات", grp_components:"المكوّنات", grp_localization:"التعريب",
+      nav_colors:"الألوان", nav_typography:"الطباعة", nav_spacing:"المسافات والانحناءات", nav_elevation:"الارتفاع والظلال",
+      nav_buttons:"الأزرار", nav_forms:"عناصر النماذج", nav_badges:"شارات الحالة", nav_cards:"البطاقات",
+      nav_table:"جدول البيانات", nav_navigation:"التنقل", nav_alerts:"التنبيهات", nav_modal:"النافذة المنبثقة", nav_rtl:"الدعم متعدد اللغات",
+      nav_header:"شريط التطبيق", nav_loading:"حالات التحميل", nav_empty:"الحالات الفارغة",
+      user_name:"أحمد التميمي", user_role:"مدير النظام", search_placeholder:"بحث...", breadcrumb_current:"نظام التصميم",
+      page_title:"نظام التصميم", page_desc:"هوية بصرية عصرية وراقية لمنصة حجز طبي، مبنية لتعمل بانسجام في الوضعين الفاتح والداكن، مع دعم كامل للاتجاهين.",
+      eyebrow_foundations:"الأساسيات", eyebrow_components:"المكوّنات", eyebrow_localization:"التعريب",
+      sec_colors_title:"اللون", sec_colors_note:"التركواز الطبي هو جوهر الهوية البصرية — يعكس الثقة دون برودة زائدة. الكهرماني يُستخدم بحذر للتمييز فقط، والألوان الدلالية منفصلة بوضوح عن لون العلامة لتفادي أي التباس في سياق طبي حساس.",
+      pal_primary:"أساسي — تركواز طبي", pal_accent:"ثانوي — كهرماني (استخدام محدود)", pal_semantic:"دلالي", pal_neutral:"محايد — رمادي",
+      lbl_spacing_scale:"مقياس المسافات", lbl_radius_scale:"مقياس الانحناء",
+      sec_type_title:"الطباعة", sec_type_note:"يُستخدم خط Rubik بجميع أوزانه لكل من الإنجليزية والعربية — صوت طباعي واحد موحّد دون أي تحوّل عند تبديل الاتجاه. خط IBM Plex Mono مخصص للبيانات: المبالغ والمعرفات والتوقيت.",
+      sec_spacing_title:"المسافات والانحناءات", sec_spacing_note:"وحدة أساس 4 بكسل. مقياس الانحناء يتدرّج من الحاد (الحقول) إلى الناعم (البطاقات والنوافذ) — مستدير دون مبالغة.",
+      sec_elevation_title:"الارتفاع والظلال", sec_elevation_note:"الظلال ممزوجة بلون العلامة التركوازي بدل الأسود الخالص — لمسة هادئة تربط كل سطح مرتفع بالهوية البصرية. مرّر المؤشر فوق أي بطاقة لتجربتها.",
+      sec_buttons_title:"الأزرار",
+      sec_forms_title:"عناصر النماذج",
+      sec_badges_title:"شارات الحالة", sec_badges_note:"نظام لوني ثابت يُستخدم في كل مكان تظهر فيه المواعيد أو الفواتير أو السجلات — يتعلمه المريض والموظف مرة واحدة فقط.",
+      sec_cards_title:"البطاقات", sec_cards_note:"النمط المميز: بطاقات الكيانات الطبية تحمل حافة ملوّنة بعرض 4 بكسل وترتفع بلطف عند المرور فوقها — تعكس الحالة الفعلية، لا مجرد زخرفة.",
+      sec_table_title:"جدول البيانات", sec_nav_title:"التنقل", sec_alerts_title:"التنبيهات", sec_modal_title:"نافذة منبثقة",
+      table_search_ph:"ابحث عن المواعيد...", filter_all:"الكل", filter_today:"اليوم", filter_week:"هذا الأسبوع",
+      table_export:"تصدير", pagination_showing:"عرض ١–٣ من ١٢٨",
+      sec_header_title:"شريط التطبيق", sec_header_note:"الشريط الذي تجلس تحته كل صفحة داخلية — بحث سريع، إشعارات حية، والوصول للحساب، دائمًا في المكان نفسه.",
+      sec_loading_title:"حالات التحميل", sec_loading_note:"الهياكل المؤقتة تعكس شكل التخطيط الفعلي — بطاقات الإحصاءات، صف الجدول، بطاقة الموعد — بحيث لا يقفز شيء عند وصول المحتوى. حركة لطيفة تصاحب تلك اللحظة.",
+      sec_empty_title:"الحالات الفارغة", sec_empty_note:"كل قائمة أو جدول أو صندوق وارد يحتاج إجابة هادئة عن «لا يوجد شيء بعد» — أيقونة، جملة واحدة واضحة، وإجراء تالٍ وحيد.",
+      empty1_title:"لا توجد مواعيد اليوم", empty1_desc:"جدول هذا الطبيب فارغ. ستظهر الحجوزات الجديدة هنا تلقائيًا.", empty1_cta:"حجز موعد",
+      empty2_title:"لا توجد نتائج", empty2_desc:"جرّب تعديل عوامل التصفية أو ابحث باسم مريض آخر.", empty2_cta:"مسح عوامل التصفية",
+      header_search_ph:"ابحث عن مرضى، مواعيد، فواتير...",
+      hdr_notif1_title:"تم حجز موعد جديد", hdr_notif1_body:"حجز عمر منصور موعدًا في الأمراض الجلدية غدًا الساعة 1:00 ظهرًا",
+      hdr_notif2_title:"طلب إعادة جدولة", hdr_notif2_body:"طلبت رنا جبار تغيير موعدها في 12 أغسطس",
+      loading_replay:"إعادة تشغيل حركة التحميل", featured_tag:"اليوم", form_phone_label:"رقم الهاتف", form_phone_valid:"يبدو جيدًا",
+      sec_rtl_title:"عرض ثنائي اللغة", sec_rtl_note:"تُستخدم خصائص CSS المنطقية بدل اليسار واليمين الثابتين — البطاقتان أدناه مثبّتتان على اتجاههما الخاص بغض النظر عن الزر العلوي، لمقارنتهما معًا.",
+      btn_confirm:"تأكيد الموعد", btn_view:"عرض التفاصيل", btn_reschedule:"إعادة الجدولة", btn_cancel:"إلغاء",
+      btn_delete:"حذف السجل", btn_disabled:"معطّل", btn_small_primary:"زر أساسي صغير", btn_small_outline:"زر بإطار صغير",
+      form_name_label:"الاسم الكامل للمريض", form_name_ph:"مثال: ليلى حسن", form_dept_label:"القسم",
+      form_dept_cardio:"أمراض القلب", form_dept_derma:"الأمراض الجلدية", form_dept_pedia:"طب الأطفال",
+      form_id_label:"الرقم الوطني", form_id_error:"يجب أن يتكون من 12 رقمًا", form_notes_label:"ملاحظات", form_notes_ph:"سبب الزيارة...",
+      form_email_confirm:"إرسال تأكيد بالبريد الإلكتروني", form_morning:"صباحًا", form_evening:"مساءً", form_sms:"تذكيرات نصية",
+      badge_confirmed:"مؤكد", badge_pending:"قيد الانتظار", badge_cancelled:"ملغى", badge_completed:"مكتمل", badge_noshow:"لم يحضر",
+      stat_appts_label:"المواعيد اليوم", stat_revenue_label:"الإيرادات اليوم (د.ع)", stat_doctors_label:"الأطباء المناوبون",
+      stat_delta_week:"▲ 12٪ مقارنة بالأسبوع الماضي", stat_delta_week2:"▲ 4٪ مقارنة بالأسبوع الماضي", stat_delta_same:"كما كان بالأمس",
+      ac1_title:"ليلى حسن ← د. أحمد كريم", ac1_sub:"أمراض القلب · فحص متابعة",
+      ac2_title:"عمر منصور ← د. سارة نبيل", ac2_sub:"الأمراض الجلدية · مريض جديد",
+      ac3_title:"رنا جبار ← د. أحمد كريم", ac3_sub:"أمراض القلب · فحص دوري",
+      th_patient:"المريض", th_doctor:"الطبيب", th_dept:"القسم", th_date:"التاريخ", th_status:"الحالة", th_amount:"المبلغ",
+      row1_name:"ليلى حسن", row1_doctor:"د. أحمد كريم", row1_dept:"أمراض القلب",
+      row2_name:"عمر منصور", row2_doctor:"د. سارة نبيل", row2_dept:"الأمراض الجلدية",
+      row3_name:"رنا جبار", row3_doctor:"د. أحمد كريم", row3_dept:"أمراض القلب",
+      nd_dashboard:"لوحة التحكم", nd_appointments:"المواعيد", nd_patients:"المرضى", nd_doctors:"الأطباء", nd_invoices:"الفواتير", nd_reports:"التقارير",
+      alert1_title:"تم تأكيد الموعد", alert1_body:"ليلى حسن محجوزة مع د. أحمد كريم يوم 9 أغسطس الساعة 10:30 صباحًا.",
+      alert2_title:"الأوقات المتاحة توشك على النفاد", alert2_body:"تبقّى موعدان فقط لدى د. سارة نبيل هذا الأسبوع.",
+      alert3_title:"انتهت مهلة الإلغاء", alert3_body:"لم يعد بالإمكان إلغاء هذا الموعد عبر التطبيق — يرجى التواصل مع مكتب الاستقبال.",
+      alert4_title:"ميزة جديدة", alert4_body:"يمكن للأطباء الآن إرفاق نتائج التحاليل مباشرة بسجل المريض.",
+      modal_title:"هل تريد إلغاء هذا الموعد؟", modal_body:"سيؤدي هذا إلى إتاحة الموعد لمرضى آخرين. لا يمكن التراجع عن هذا الإجراء بعد انتهاء مهلة 24 ساعة.",
+      modal_keep:"الاحتفاظ بالموعد", modal_yes_cancel:"نعم، إلغاء الموعد", replay_btn:"↻ إعادة تشغيل حركة الدخول",
+      footer_text:"نظام التصميم – مركز ميديكير · الإصدار 1.0 · مُعد لمرحلة بناء الواجهة الأمامية"
+    }
+  };
+
+  function applyLanguage(lang){
+    document.querySelectorAll('[data-i18n]').forEach(el=>{
+      const key = el.getAttribute('data-i18n');
+      if(translations[lang][key] !== undefined) el.textContent = translations[lang][key];
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+      const key = el.getAttribute('data-i18n-ph');
+      if(translations[lang][key] !== undefined) el.setAttribute('placeholder', translations[lang][key]);
+    });
+  }
+
+  const root = document.documentElement;
+  const themeBtn = document.getElementById('themeToggle');
+  const themeLabel = document.getElementById('themeLabel');
+  const themeIcon = document.getElementById('themeIcon');
+  const dirBtn = document.getElementById('dirToggle');
+  const dirLabel = document.getElementById('dirLabel');
+
+  function updateToggleLabels(){
+    const dark = root.getAttribute('data-theme') === 'dark';
+    const rtl = root.getAttribute('dir') === 'rtl';
+    themeIcon.textContent = dark ? '☀️' : '🌙';
+    themeLabel.textContent = rtl ? (dark ? 'الوضع الفاتح' : 'الوضع الداكن') : (dark ? 'Light mode' : 'Dark mode');
+    dirLabel.textContent = rtl ? 'English (LTR)' : 'العربية (RTL)';
+  }
+
+  themeBtn.addEventListener('click', () => {
+    const isDark = root.getAttribute('data-theme') === 'dark';
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    updateToggleLabels();
+  });
+
+  dirBtn.addEventListener('click', () => {
+    const isRTL = root.getAttribute('dir') === 'rtl';
+    const newDir = isRTL ? 'ltr' : 'rtl';
+    root.setAttribute('dir', newDir);
+    root.setAttribute('lang', newDir === 'rtl' ? 'ar' : 'en');
+    applyLanguage(newDir === 'rtl' ? 'ar' : 'en');
+    updateToggleLabels();
+  });
+
+  document.getElementById('replayBtn').addEventListener('click', () => {
+    const box = document.getElementById('modalBox');
+    box.style.animation = 'none';
+    void box.offsetWidth;
+    box.style.animation = 'modalIn .5s var(--ease)';
+  });
+
+  document.getElementById('loadDemoBtn').addEventListener('click', () => {
+    const el = document.getElementById('loadedCard');
+    el.style.display = 'none';
+    void el.offsetWidth;
+    el.style.display = 'block';
+    el.classList.remove('page-enter');
+    void el.offsetWidth;
+    el.classList.add('page-enter');
+  });
+
+  const sidenav = document.getElementById('sidenav');
+  document.getElementById('collapseBtn').addEventListener('click', () => {
+    sidenav.classList.toggle('collapsed');
+  });
+
+  if (window.lucide) { lucide.createIcons(); }
+
+  // Scrollspy: highlight the sidebar link matching the section in view
+  const navLinks = Array.from(document.querySelectorAll('.sidenav nav a'));
+  const sections = navLinks.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const link = navLinks.find(a => a.getAttribute('href') === '#' + entry.target.id);
+      if (!link) return;
+      if (entry.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active-link'));
+        link.classList.add('active-link');
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px' });
+  sections.forEach(s => spy.observe(s));
+
+  // Smooth scroll-reveal: sections fade & rise into view once
+  const reveal = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('page-enter');
+        reveal.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('main > section').forEach(s => reveal.observe(s));
+
+  updateToggleLabels();
+</script>
+</body>
+</html>

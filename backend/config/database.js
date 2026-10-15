@@ -1,0 +1,20 @@
+/**
+ * MySQL Connection Pool
+ * Creates and exports a promise-based mysql2 connection pool using environment variables.
+ * Pool settings allow up to 10 concurrent connections with queuing.
+ */
+
+const mysql = require("mysql2");
+
+// Create a reusable MySQL connection pool (env loaded in server.js)
+const db = mysql.createPool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+}).promise();
+
+module.exports = db;
