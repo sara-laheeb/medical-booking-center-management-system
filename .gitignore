@@ -19,6 +19,11 @@ frontend/dist/
 
 # Local cleanup backups
 _cleanup_backup/
+_db_backup/
+_unused_backup/
+
+# Runtime data stores (keep local, do not commit)
+backend/data/notifications_store.json
 
 # Editor & OS artifacts
 .vscode/
@@ -26,3 +31,8 @@ _cleanup_backup/
 .DS_Store
 Thumbs.db
 *.lnk
+
+# Backup directories
+**/*backup*/
+
+backend/data/pharmacy_store.json

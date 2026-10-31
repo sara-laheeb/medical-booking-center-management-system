@@ -16,7 +16,17 @@ const createMedicationSchema = Joi.object({
   cost_price: Joi.number().min(0).precision(2).default(0),
   selling_price: Joi.number().min(0).precision(2).default(0),
 
-  is_active: Joi.boolean().default(true)
+  is_active: Joi.boolean().default(true),
+
+  // Extended pharmaceutical metadata
+  generic_name: Joi.string().trim().max(150).allow('', null),
+  strength: Joi.string().trim().max(100).allow('', null),
+  dosage_form: Joi.string().trim().max(100).allow('', null),
+  manufacturer: Joi.string().trim().max(150).allow('', null),
+  barcode: Joi.string().trim().max(100).allow('', null),
+  batch_number: Joi.string().trim().max(100).allow('', null),
+  expiry_date: Joi.string().trim().max(50).allow('', null),
+  supplier: Joi.string().trim().max(150).allow('', null)
 }).strict();
 
 // ── Update Medication Schema ─────────────────────────────────────────────
@@ -33,7 +43,17 @@ const updateMedicationSchema = Joi.object({
   cost_price: Joi.number().min(0).precision(2),
   selling_price: Joi.number().min(0).precision(2),
 
-  is_active: Joi.boolean()
+  is_active: Joi.boolean(),
+
+  // Extended pharmaceutical metadata
+  generic_name: Joi.string().trim().max(150).allow('', null),
+  strength: Joi.string().trim().max(100).allow('', null),
+  dosage_form: Joi.string().trim().max(100).allow('', null),
+  manufacturer: Joi.string().trim().max(150).allow('', null),
+  barcode: Joi.string().trim().max(100).allow('', null),
+  batch_number: Joi.string().trim().max(100).allow('', null),
+  expiry_date: Joi.string().trim().max(50).allow('', null),
+  supplier: Joi.string().trim().max(150).allow('', null)
 })
   .min(1)
   .messages({
@@ -41,13 +61,14 @@ const updateMedicationSchema = Joi.object({
   });
 
 // ── Adjust Stock Schema ───────────────────────────────────────────────────
-// Positive delta restocks, negative delta consumes (e.g. manual correction,
-// damaged/expired write-off). Actual dispensing against a prescription is
-// handled by the Pharmacy module, not here.
+// Positive delta restocks, negative delta consumes. Supports delta or quantity + type.
 const adjustStockSchema = Joi.object({
-  delta: Joi.number().integer().invalid(0).required(),
-  reason: Joi.string().trim().max(255).allow('', null).default(null)
-}).strict();
+  delta: Joi.number().integer().invalid(0),
+  quantity: Joi.number().integer().min(1),
+  type: Joi.string().valid('add', 'subtract', 'remove'),
+  reason: Joi.string().trim().max(255).allow('', null).default(null),
+  unit_cost: Joi.number().min(0).precision(2).optional()
+}).or('delta', 'quantity');
 
 // ── Query Schema ─────────────────────────────────────────────────────────
 const medicationQuerySchema = Joi.object({

@@ -19,6 +19,7 @@
  */
 
 const PatientModel = require('../models/patient.model');
+const db = require('../config/database');
 const AppError = require('../errors/AppError');
 
 class PatientService {
@@ -76,7 +77,7 @@ class PatientService {
    * - Search
    * - Status filtering
    */
-  async getAllPatients(query = {}) {
+  async getAllPatients(query = {}, user = null) {
 
     const {
       page,
@@ -85,9 +86,37 @@ class PatientService {
     } = this._parsePagination(query);
 
     const filters = {
-      search: (query.search || '').trim()
-      
+      search: (query.search || '').trim(),
+      doctorId: null
     };
+
+    if (user && user.role === 'doctor') {
+      const [docRows] = await db.execute('SELECT id FROM doctors WHERE user_id = ? LIMIT 1', [user.id]);
+      if (docRows[0]) {
+        filters.doctorId = docRows[0].id;
+      } else {
+        return {
+          data: [],
+          meta: { total: 0, page: 1, limit, totalPages: 1, hasNextPage: false, hasPrevPage: false }
+        };
+      }
+    } else if (user && user.role === 'patient') {
+      const [patRows] = await db.execute(
+        'SELECT id FROM patients WHERE user_id = ? OR email = ? LIMIT 1',
+        [user.id, user.email]
+      );
+      if (patRows[0]) {
+        const patient = await this.getPatientById(patRows[0].id, user);
+        return {
+          data: [patient],
+          meta: { total: 1, page: 1, limit, totalPages: 1, hasNextPage: false, hasPrevPage: false }
+        };
+      }
+      return {
+        data: [],
+        meta: { total: 0, page: 1, limit, totalPages: 1, hasNextPage: false, hasPrevPage: false }
+      };
+    }
 
     const [
       patients,
@@ -120,10 +149,37 @@ class PatientService {
   }
 
   /**
-   * Retrieve one patient by ID.
+   * Retrieve one patient by ID, enforcing assignment permissions.
    */
-  async getPatientById(id) {
-    return this._findOrFail(id);
+  async getPatientById(id, user = null) {
+    const patient = await this._findOrFail(id);
+
+    if (user && user.role === 'doctor') {
+      const [docRows] = await db.execute('SELECT id FROM doctors WHERE user_id = ? LIMIT 1', [user.id]);
+      if (!docRows[0]) {
+        throw new AppError('Doctor profile not found', 404);
+      }
+      const [assigned] = await db.execute(
+        `SELECT 1 FROM appointments WHERE patient_id = ? AND doctor_id = ? AND deleted_at IS NULL
+         UNION
+         SELECT 1 FROM medical_records WHERE patient_id = ? AND doctor_id = ? AND deleted_at IS NULL
+         LIMIT 1`,
+        [id, docRows[0].id, id, docRows[0].id]
+      );
+      if (assigned.length === 0) {
+        throw new AppError('Doctors can only access records of patients assigned to their care', 403);
+      }
+    } else if (user && user.role === 'patient') {
+      const [patRows] = await db.execute(
+        'SELECT id FROM patients WHERE user_id = ? OR email = ? LIMIT 1',
+        [user.id, user.email]
+      );
+      if (!patRows[0] || Number(patient.id) !== Number(patRows[0].id)) {
+        throw new AppError('Patients can only view their own profile', 403);
+      }
+    }
+
+    return patient;
   }
 
   /**
@@ -180,9 +236,19 @@ class PatientService {
    * Checks uniqueness while excluding
    * the current patient record.
    */
-  async updatePatient(id, data) {
+  async updatePatient(id, data, user = null) {
 
-    await this._findOrFail(id);
+    const patient = await this._findOrFail(id);
+
+    if (user && user.role === 'patient') {
+      const [patRows] = await db.execute(
+        'SELECT id FROM patients WHERE user_id = ? OR email = ? LIMIT 1',
+        [user.id, user.email]
+      );
+      if (!patRows[0] || Number(patient.id) !== Number(patRows[0].id)) {
+        throw new AppError('Patients can only update their own profile', 403);
+      }
+    }
 
     if (data.national_id) {
 

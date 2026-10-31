@@ -73,6 +73,20 @@ class DashboardController {
       'Top doctors retrieved successfully'
     );
   });
+
+  getDoctorSummary = asyncHandler(async (req, res) => {
+    const summary = await dashboardService.getDoctorSummary(req.user.id);
+
+    if (!summary) {
+      return ApiResponse.error(res, 'Doctor profile not found', 404);
+    }
+
+    return ApiResponse.success(
+      res,
+      summary,
+      'Doctor dashboard summary retrieved successfully'
+    );
+  });
 }
 
 module.exports = new DashboardController();

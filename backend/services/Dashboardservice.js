@@ -102,6 +102,14 @@ class DashboardService {
       limit
     });
   }
+
+  /**
+   * Get a doctor's own personalized dashboard summary.
+   * Uses user_id from JWT — backend-enforced data isolation.
+   */
+  async getDoctorSummary(userId) {
+    return DashboardModel.getDoctorSummary(userId);
+  }
 }
 
 module.exports = new DashboardService();

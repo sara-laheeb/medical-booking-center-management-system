@@ -68,6 +68,15 @@ export const dashboardService = {
     const res = await api.get(`/dashboard/top-doctors${qs ? `?${qs}` : ''}`);
     return res.data || [];
   },
+
+  /**
+   * Get doctor's personalized dashboard summary (doctor only)
+   * Returns: { doctor, appointmentsToday, totalPatients, appointmentsThisWeek, appointmentsByStatus, recentAppointments }
+   */
+  async getDoctorSummary() {
+    const res = await api.get('/dashboard/my-summary');
+    return res.data;
+  },
 };
 
 export default dashboardService;

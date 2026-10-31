@@ -9,12 +9,23 @@ const authService = require('../services/authService');
 const { sendSuccess, sendError } = require('../utils/apiResponse');
 
 /**
- * Register a new user.
+ * Register a new user (Patient with immediate access or Doctor pending administrative approval).
  * POST /api/v1/auth/register
  */
 const register = async (req, res) => {
-    const { name, email, password } = req.body;
+    const {
+        name,
+        email,
+        phone,
+        password,
+        role = 'patient',
+        specialty_id,
+        license_number,
+        verification_documents,
+        notes
+    } = req.body;
 
+    // Validate fundamental identity attributes
     if (!name || !email || !password) {
         return sendError(
             res,
@@ -31,12 +42,46 @@ const register = async (req, res) => {
         );
     }
 
-   
+    // Guard against unauthorized registration of privileged administration roles
+    if (['admin', 'receptionist', 'pharmacist'].includes(role)) {
+        return sendError(
+            res,
+            'Public registration is restricted to patients and doctors only',
+            403
+        );
+    }
+
+    // Role-specific field validation
+    if (role === 'doctor') {
+        if (!specialty_id) {
+            return sendError(res, 'Medical specialty is required for doctor registration', 400);
+        }
+        if (!license_number) {
+            return sendError(res, 'Medical license number is required for doctor registration', 400);
+        }
+    }
+
+    // Forward registration payload to authentication service
     const result = await authService.register({
         name,
         email,
-        password    
+        phone,
+        password,
+        role,
+        specialty_id,
+        license_number,
+        verification_documents,
+        notes
     });
+
+    if (result.pending) {
+        return sendSuccess(
+            res,
+            result,
+            'Doctor registration request submitted successfully. Account is pending administrator approval.',
+            201
+        );
+    }
 
     return sendSuccess(
         res,

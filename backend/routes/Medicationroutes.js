@@ -125,7 +125,8 @@ router
     medicationController.getAll
   )
   .post(
-    authorize('admin'),
+    // Authorize clinic administrators and pharmacists to catalog medicines
+    authorize('admin', 'pharmacist'),
     validate(createMedicationSchema),
     medicationController.create
   );
@@ -222,13 +223,15 @@ router
     medicationController.getById
   )
   .put(
-    authorize('admin'),
+    // Authorize clinic administrators and pharmacists to update medicine catalog
+    authorize('admin', 'pharmacist'),
     validateId(),
     validate(updateMedicationSchema),
     medicationController.update
   )
   .delete(
-    authorize('admin'),
+    // Authorize clinic administrators and pharmacists to deactivate medicines
+    authorize('admin', 'pharmacist'),
     validateId(),
     medicationController.delete
   );
@@ -274,7 +277,8 @@ router
  */
 router.patch(
   '/:id/stock',
-  authorize('admin'),
+  // Authorize clinic administrators and pharmacists to execute stock adjustments
+  authorize('admin', 'pharmacist'),
   validateId(),
   validate(adjustStockSchema),
   medicationController.adjustStock

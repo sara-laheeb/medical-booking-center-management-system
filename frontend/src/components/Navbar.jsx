@@ -50,14 +50,14 @@ export default function Navbar() {
               {user?.name ? `${user.name.split(' ')[0]} (Workspace)` : 'Open Workspace'}
             </Button>
           ) : (
-            <>
-              <Link to="/login" className="navbar-signin">
-                {t.nav.signIn}
-              </Link>
-              <Button as={Link} to="/register" variant="primary" size="sm">
-                {t.nav.getStarted}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <Button as={Link} to="/login" variant="outline" size="sm">
+                {t.nav?.signIn || 'Sign In'}
               </Button>
-            </>
+              <Button as={Link} to="/register" variant="primary" size="sm">
+                {t.nav?.signUp || t.nav?.getStarted || 'Sign Up'}
+              </Button>
+            </div>
           )}
         </div>
 
@@ -93,23 +93,24 @@ export default function Navbar() {
                   Open Workspace
                 </Button>
               ) : (
-                <>
-                  <Link
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', marginTop: 8 }}>
+                  <Button
+                    as={Link}
                     to="/login"
-                    className="navbar-signin"
+                    variant="outline"
                     onClick={() => setOpen(false)}
                   >
-                    {t.nav.signIn}
-                  </Link>
+                    {t.nav?.signIn || 'Sign In'}
+                  </Button>
                   <Button
                     as={Link}
                     to="/register"
                     variant="primary"
                     onClick={() => setOpen(false)}
                   >
-                    {t.nav.getStarted}
+                    {t.nav?.signUp || t.nav?.getStarted || 'Sign Up'}
                   </Button>
-                </>
+                </div>
               )}
             </div>
           </Container>

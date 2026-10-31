@@ -132,7 +132,7 @@ router.use(authenticate);
 router
   .route('/')
   .get(
-    authorize('admin', 'receptionist', 'doctor', 'patient'),
+    authorize('admin', 'receptionist', 'doctor', 'patient', 'pharmacist'),
     validate(prescriptionQuerySchema, 'query'),
     prescriptionController.getAll
   )
@@ -226,7 +226,8 @@ router
 router
   .route('/:id')
   .get(
-    authorize('admin', 'receptionist', 'doctor', 'patient'),
+    // Authorize clinical, front-desk, and pharmacy dispensary staff to inspect prescriptions
+    authorize('admin', 'receptionist', 'doctor', 'patient', 'pharmacist'),
     validateId(),
     prescriptionController.getById
   )
@@ -282,7 +283,7 @@ router
  */
 router.patch(
   '/:id/status',
-  authorize('admin', 'receptionist'),
+  authorize('admin', 'receptionist', 'pharmacist'),
   validateId(),
   validate(updatePrescriptionStatusSchema),
   prescriptionController.updateStatus

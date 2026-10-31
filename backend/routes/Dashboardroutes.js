@@ -397,7 +397,7 @@ router.get(
 
 router.get(
   '/low-stock',
-  authorize('admin'),
+  authorize('admin', 'pharmacist'),
   validate(listQuerySchema, 'query'),
   dashboardController.getLowStockAlerts
 );
@@ -414,6 +414,31 @@ router.get(
   authorize('admin'),
   validate(topDoctorsQuerySchema, 'query'),
   dashboardController.getTopDoctors
+);
+
+/**
+ * @swagger
+ * /dashboard/my-summary:
+ *   get:
+ *     summary: Get doctor's personalized dashboard summary
+ *     description: 'Fetch doctor-specific appointment metrics, specialty clinical details, and schedule. Requires role: doctor.'
+ *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Doctor dashboard summary retrieved successfully
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       404:
+ *         description: Doctor profile not found
+ */
+router.get(
+  '/my-summary',
+  authorize('doctor'),
+  dashboardController.getDoctorSummary
 );
 
 module.exports = router;

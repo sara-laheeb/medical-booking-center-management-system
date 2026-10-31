@@ -1025,6 +1025,29 @@ tbody tr:hover .row-actions {
 .modal-box-xl {
   width: 720px;
 }
+.modal-body-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) transparent;
+}
+.modal-body-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-body-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.modal-body-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: var(--r-full);
+  transition: background var(--dur) var(--ease);
+}
+.modal-body-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--brand);
+}
 .modal-close {
   position: absolute;
   top: 16px;

@@ -11,11 +11,11 @@ export const authService = {
   },
 
   /**
-   * Register a new user
-   * Returns: { user: { id, name, email, role, is_active }, token }
+   * Register a new user (patient or doctor)
+   * Returns: { user: { id, name, email, role, is_active }, token } or { pending: true, user }
    */
-  async register({ name, email, password, role = 'patient' }) {
-    const res = await api.post('/auth/register', { name, email, password, role });
+  async register(payload) {
+    const res = await api.post('/auth/register', payload);
     return res.data;
   },
 

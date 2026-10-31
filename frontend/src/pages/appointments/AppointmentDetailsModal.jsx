@@ -4,7 +4,7 @@
  * doctor, timing, visit type, chief complaint, status, and available actions.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import Badge from '../../components/common/Badge';
 import {
@@ -25,8 +25,22 @@ export default function AppointmentDetailsModal({
   onOpenReschedule,
   onOpenCancel,
   onUpdateStatus,
+  canConfirm = true,
 }) {
   const { t } = useLanguage();
+
+  const overlayMouseDownRef = useRef(false);
+
+  const handleOverlayMouseDown = (e) => {
+    overlayMouseDownRef.current = (e.target === e.currentTarget);
+  };
+
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget && overlayMouseDownRef.current) {
+      onClose();
+    }
+    overlayMouseDownRef.current = false;
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -66,40 +80,78 @@ export default function AppointmentDetailsModal({
   const isFinalStatus = ['completed', 'cancelled'].includes(appointment.status);
 
   return (
-    <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
+    <div
+      className="modal-overlay"
+      onMouseDown={handleOverlayMouseDown}
+      onClick={handleOverlayClick}
+      role="dialog"
+      aria-modal="true"
+    >
       <div
         className="modal-box modal-box-lg"
         onClick={(e) => e.stopPropagation()}
-        style={{ padding: 'var(--sp-6)' }}
+        onMouseDown={(e) => e.stopPropagation()}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          maxHeight: 'min(90vh, 680px)',
+          height: 'auto',
+          padding: 0,
+          overflow: 'hidden',
+          width: '620px',
+        }}
       >
-        <button
-          type="button"
-          className="modal-close"
-          onClick={onClose}
-          aria-label={t.appointments?.close || 'Close'}
+        {/* Fixed Header */}
+        <div
+          style={{
+            padding: '16px 20px',
+            borderBottom: '1px solid var(--border-subtle)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            background: 'var(--bg-surface)',
+            flexShrink: 0,
+          }}
         >
-          <CloseIcon />
-        </button>
-
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, paddingInlineEnd: 32 }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span className="mono" style={{ fontSize: 18, fontWeight: 800, color: 'var(--ink)' }}>
+              <span className="mono" style={{ fontSize: 17, fontWeight: 800, color: 'var(--ink)' }}>
                 {appointment.appointment_code}
               </span>
               <Badge variant={statusVariantMap[appointment.status] || 'pending'}>
                 {statusLabelMap[appointment.status] || appointment.status}
               </Badge>
             </div>
-            <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
+            <div style={{ fontSize: 12.5, color: 'var(--text-secondary)', marginTop: 2 }}>
               {t.appointments?.detailsTitle || 'Appointment Details'}
             </div>
           </div>
+
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={onClose}
+            aria-label={t.appointments?.close || 'Close'}
+            style={{ width: 32, height: 32, color: 'var(--text-secondary)' }}
+          >
+            <CloseIcon width={16} height={16} />
+          </button>
         </div>
 
-        {/* Content Grid */}
-        <div className="stack" style={{ gap: 14 }}>
+        {/* Scrollable Content Body */}
+        <div
+          className="modal-body-scroll"
+          tabIndex={0}
+          style={{
+            padding: '18px 20px',
+            overflowY: 'auto',
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 14,
+            outline: 'none',
+          }}
+        >
           {/* Patient & Doctor Cards */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div
@@ -258,20 +310,23 @@ export default function AppointmentDetailsModal({
           </div>
         </div>
 
-        {/* Modal Actions */}
+        {/* Fixed Modal Actions Footer */}
         <div
-          className="modal-actions"
           style={{
-            marginTop: 20,
-            paddingTop: 16,
+            padding: '12px 20px',
             borderTop: '1px solid var(--border-subtle)',
+            background: 'var(--bg-surface-alt)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
             flexWrap: 'wrap',
+            flexShrink: 0,
           }}
         >
           {/* Status buttons if not in final state */}
           {!isFinalStatus && (
             <>
-              {appointment.status === 'pending' && (
+              {appointment.status === 'pending' && canConfirm && (
                 <button
                   type="button"
                   className="btn btn-primary"

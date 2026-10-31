@@ -21,6 +21,7 @@
 const db = require('../config/database');
 const MedicationModel = require('../models/medication.model');
 const AppError = require('../errors/AppError');
+const pharmacyStore = require('./pharmacyStore');
 
 const parsePagination = ({ page = 1, limit = 10 }) => {
   const parsedPage = Math.max(1, parseInt(page, 10) || 1);
@@ -99,15 +100,26 @@ class PharmacyService {
       params.push(query.status);
     }
 
+    // Join patient and doctor details so pharmacy queue displays names directly
     const [rows] = await db.execute(
       `
       SELECT rx.id,
              rx.prescription_code,
+             rx.appointment_id,
              rx.patient_id,
+             CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
+             p.phone AS patient_phone,
              rx.doctor_id,
+             du.name AS doctor_name,
              rx.status,
+             rx.notes,
+             rx.dispensed_by,
+             rx.dispensed_at,
              rx.created_at
       FROM prescriptions rx
+      LEFT JOIN patients p ON p.id = rx.patient_id
+      LEFT JOIN doctors d  ON d.id = rx.doctor_id
+      LEFT JOIN users du   ON du.id = d.user_id
       ${where}
       ORDER BY rx.created_at DESC
       LIMIT ${Number(limit)}
@@ -207,7 +219,8 @@ class PharmacyService {
    * Business rules:
    * - Prescription must still be pending
    * - Every item must have enough stock available
-   * - Stock is decremented for every dispensed item
+   * - Medicine cannot be expired or deactivated
+   * - Stock is decremented for every dispensed item and recorded in audit log
    */
   async dispensePrescription(id, dispensedBy) {
 
@@ -220,11 +233,27 @@ class PharmacyService {
       );
     }
 
+    // Safety check: verify each medication is active, non-expired, and has sufficient stock
     for (const item of prescription.items) {
 
       const medication = await MedicationModel.findById(item.medication_id);
+      if (!medication) {
+        throw new AppError(`Medication #${item.medication_id} not found in inventory`, 404);
+      }
 
-      if (medication.stock_quantity < item.quantity) {
+      if (!medication.is_active) {
+        throw new AppError(`Medication "${medication.name}" is deactivated/unavailable`, 422);
+      }
+
+      const enriched = pharmacyStore.enrichMedication(medication);
+      if (enriched.is_expired) {
+        throw new AppError(
+          `Cannot dispense expired medication "${medication.name}" (Expired on ${enriched.expiry_date})`,
+          422
+        );
+      }
+
+      if (Number(medication.stock_quantity) < Number(item.quantity)) {
         throw new AppError(
           `Insufficient stock for "${medication.name}" (available: ${medication.stock_quantity}, needed: ${item.quantity})`,
           422
@@ -232,8 +261,25 @@ class PharmacyService {
       }
     }
 
+    // Deduct stock and log audit transaction
     for (const item of prescription.items) {
+      const medication = await MedicationModel.findById(item.medication_id);
       await MedicationModel.adjustStock(item.medication_id, -item.quantity);
+
+      pharmacyStore.logTransaction({
+        medication_id: item.medication_id,
+        medication_name: medication.name,
+        transaction_type: 'dispensed',
+        quantity: item.quantity,
+        previous_stock: Number(medication.stock_quantity),
+        new_stock: Number(medication.stock_quantity) - item.quantity,
+        unit_cost: Number(medication.cost_price) || 0,
+        total_cost: (Number(medication.cost_price) || 0) * item.quantity,
+        reference_id: prescription.prescription_code,
+        reason: `Dispensed against prescription ${prescription.prescription_code} for ${prescription.patient_name || 'patient'}`,
+        performed_by: dispensedBy,
+        performer_name: 'Pharmacist'
+      });
     }
 
     await db.execute(
@@ -265,6 +311,168 @@ class PharmacyService {
     );
 
     return this._getPrescriptionOrFail(id);
+  }
+
+  /**
+   * Pharmacy overview statistics: medicines count, low stock, out of stock,
+   * expiring count, prescription queue counts, and inventory valuation.
+   */
+  async getPharmacyStats() {
+    // 1. Fetch active medicines and calculate live inventory status
+    const [allMeds] = await db.execute('SELECT * FROM medications WHERE is_active = 1');
+    const enriched = pharmacyStore.enrichMedications(allMeds);
+
+    const totalMedicines = enriched.length;
+    let lowStockCount = 0;
+    let outOfStockCount = 0;
+    let expiringCount = 0;
+    let expiredCount = 0;
+    let totalInventoryValue = 0;
+
+    enriched.forEach((m) => {
+      if (m.is_out_of_stock) {
+        outOfStockCount++;
+      } else if (m.is_low_stock) {
+        lowStockCount++;
+      }
+
+      if (m.is_expired) {
+        expiredCount++;
+      } else if (m.is_expiring_soon) {
+        expiringCount++;
+      }
+
+      totalInventoryValue += (Number(m.stock_quantity) || 0) * (Number(m.cost_price) || 0);
+    });
+
+    // 2. Fetch pending and dispensed prescription counts
+    const [[pendingRx]] = await db.execute(
+      "SELECT COUNT(*) AS total FROM prescriptions WHERE status = 'pending'"
+    );
+    const [[dispensedRx]] = await db.execute(
+      "SELECT COUNT(*) AS total FROM prescriptions WHERE status = 'dispensed'"
+    );
+
+    // 3. Fetch recent audit stock transactions
+    const recentTransactions = pharmacyStore.getTransactions({ limit: 10 }).data;
+
+    return {
+      totalMedicines,
+      lowStockCount,
+      outOfStockCount,
+      expiringCount,
+      expiredCount,
+      totalInventoryValue: Math.round(totalInventoryValue * 100) / 100,
+      pendingPrescriptionsCount: pendingRx?.total || 0,
+      dispensedPrescriptionsCount: dispensedRx?.total || 0,
+      recentTransactions
+    };
+  }
+
+  /**
+   * Stock operations: receive wholesale batch, process returns, or adjust quantities.
+   */
+  async stockOperation(payload, user = {}) {
+    const {
+      medication_id,
+      operation_type, // 'receive' | 'adjust' | 'return'
+      quantity,
+      unit_cost,
+      reason,
+      supplier,
+      batch_number,
+      expiry_date
+    } = payload;
+
+    const med = await MedicationModel.findById(medication_id);
+    if (!med) {
+      throw new AppError(`Medication #${medication_id} not found`, 404);
+    }
+
+    const qty = Math.abs(Number(quantity));
+    if (isNaN(qty) || qty <= 0) {
+      throw new AppError('Quantity must be a positive number', 400);
+    }
+
+    let delta = 0;
+    let txType = 'received';
+
+    if (operation_type === 'receive') {
+      delta = qty;
+      txType = 'received';
+      if (batch_number || expiry_date || supplier) {
+        pharmacyStore.setMedicationDetails(medication_id, {
+          batch_number,
+          expiry_date,
+          supplier
+        });
+      }
+    } else if (operation_type === 'return') {
+      const isSupplierReturn = payload.return_direction === 'supplier' || payload.direction === 'supplier';
+      delta = isSupplierReturn ? -qty : qty;
+      txType = 'returned';
+    } else if (operation_type === 'adjust') {
+      const isNegative = payload.adjustment_type === 'deduct' || payload.adjustment_type === 'damage' || Number(quantity) < 0;
+      delta = isNegative ? -qty : qty;
+      txType = 'adjusted';
+    } else {
+      throw new AppError(`Invalid operation type "${operation_type}"`, 400);
+    }
+
+    const newStock = Number(med.stock_quantity) + delta;
+    if (newStock < 0) {
+      throw new AppError(
+        `Insufficient stock for "${med.name}" to deduct ${qty}. Current stock: ${med.stock_quantity}`,
+        422
+      );
+    }
+
+    const updated = await MedicationModel.adjustStock(medication_id, delta);
+    if (!updated) {
+      throw new AppError('Failed to adjust stock', 500);
+    }
+
+    const tx = pharmacyStore.logTransaction({
+      medication_id,
+      medication_name: med.name,
+      transaction_type: txType,
+      quantity: qty,
+      previous_stock: Number(med.stock_quantity),
+      new_stock: newStock,
+      unit_cost: Number(unit_cost) || Number(med.cost_price) || 0,
+      total_cost: qty * (Number(unit_cost) || Number(med.cost_price) || 0),
+      reference_id: payload.reference_id || `STK-${Date.now().toString().slice(-6)}`,
+      reason: reason || `Pharmacy ${operation_type} stock operation`,
+      performed_by: user.id || 1,
+      performer_name: user.name || 'Pharmacist'
+    });
+
+    const refreshedMed = await MedicationModel.findById(medication_id);
+    return {
+      medication: pharmacyStore.enrichMedication(refreshedMed),
+      transaction: tx
+    };
+  }
+
+  /**
+   * Get paginated audit stock transactions.
+   */
+  getStockTransactions(query = {}) {
+    return pharmacyStore.getTransactions(query);
+  }
+
+  /**
+   * Get supplier directory.
+   */
+  getSuppliers() {
+    return pharmacyStore.getSuppliers();
+  }
+
+  /**
+   * Add or update supplier.
+   */
+  saveSupplier(payload) {
+    return pharmacyStore.saveSupplier(payload);
   }
 }
 

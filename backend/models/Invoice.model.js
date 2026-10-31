@@ -49,7 +49,7 @@ class InvoiceModel {
    *
    * Supports filtering by patient, status and creation date range.
    */
-  static async findAll({ limit, offset, patientId, status, dateFrom, dateTo }) {
+  static async findAll({ limit, offset, patientId, doctorId, status, dateFrom, dateTo }) {
 
     const params = [];
 
@@ -58,6 +58,11 @@ class InvoiceModel {
     if (patientId) {
       where += ' AND i.patient_id = ?';
       params.push(patientId);
+    }
+
+    if (doctorId) {
+      where += ' AND i.doctor_id = ?';
+      params.push(doctorId);
     }
 
     if (status) {
@@ -97,7 +102,7 @@ return rows;
   /**
    * Count invoices for pagination metadata.
    */
-  static async countAll({ patientId, status, dateFrom, dateTo }) {
+  static async countAll({ patientId, doctorId, status, dateFrom, dateTo }) {
 
     const params = [];
 
@@ -106,6 +111,11 @@ return rows;
     if (patientId) {
       where += ' AND i.patient_id = ?';
       params.push(patientId);
+    }
+
+    if (doctorId) {
+      where += ' AND i.doctor_id = ?';
+      params.push(doctorId);
     }
 
     if (status) {

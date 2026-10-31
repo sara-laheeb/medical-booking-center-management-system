@@ -266,6 +266,160 @@ class DoctorService {
 
     return { message: 'Doctor deactivated successfully' };
   }
+
+  /**
+   * Helper to convert HH:MM:SS or HH:MM string to minutes from midnight.
+   */
+  _timeToMinutes(timeStr) {
+    if (!timeStr) return 0;
+    const [h, m] = timeStr.split(':').map(Number);
+    return (h || 0) * 60 + (m || 0);
+  }
+
+  /**
+   * Helper to convert minutes from midnight to HH:MM:SS string.
+   */
+  _minutesToTime(totalMins) {
+    const h = Math.floor(totalMins / 60);
+    const m = totalMins % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`;
+  }
+
+  /**
+   * Compute real schedule availability and available time slots for a doctor on a specific date.
+   *
+   * Rules:
+   * - Validates date format (YYYY-MM-DD)
+   * - Checks if day of week is an active work day in doctor.work_days
+   * - Slices working window [work_start, work_end] into intervals of appointment_duration
+   * - Checks overlap with existing non-cancelled appointments for that doctor on that date
+   * - Marks past slots as unavailable if date is today
+   */
+  async getDoctorAvailability(doctorId, dateString) {
+    const doctor = await this._findOrFail(doctorId);
+
+    if (!doctor.is_active) {
+      throw new AppError('This doctor is not currently active', 422);
+    }
+
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateString || !dateRegex.test(dateString)) {
+      throw new AppError('Valid date in format YYYY-MM-DD is required', 400);
+    }
+
+    // Determine day of the week in UTC
+    const [year, month, day] = dateString.split('-').map(Number);
+    const dateObj = new Date(Date.UTC(year, month - 1, day));
+    const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    const dayOfWeek = dayNames[dateObj.getUTCDay()];
+
+    const doctorWorkDays = (doctor.work_days || '')
+      .toLowerCase()
+      .split(',')
+      .map((d) => d.trim())
+      .filter(Boolean);
+
+    const isWorkDay = doctorWorkDays.includes(dayOfWeek);
+    const duration = Number(doctor.appointment_duration) || 30;
+    const workStart = doctor.work_start || '09:00:00';
+    const workEnd = doctor.work_end || '17:00:00';
+
+    if (!isWorkDay) {
+      return {
+        doctorId: doctor.id,
+        doctorName: doctor.full_name,
+        specialtyId: doctor.specialty_id,
+        specialtyName: doctor.specialty_name_en,
+        specialtyNameAr: doctor.specialty_name_ar,
+        consultationFee: doctor.consultation_fee,
+        date: dateString,
+        dayOfWeek,
+        isWorkDay: false,
+        durationMinutes: duration,
+        workHours: {
+          start: workStart,
+          end: workEnd,
+        },
+        slots: [],
+      };
+    }
+
+    // Generate potential intervals
+    const slots = [];
+    let currentMins = this._timeToMinutes(workStart);
+    const endMins = this._timeToMinutes(workEnd);
+
+    while (currentMins + duration <= endMins) {
+      const start = this._minutesToTime(currentMins);
+      const end = this._minutesToTime(currentMins + duration);
+      slots.push({
+        start_time: start,
+        end_time: end,
+        available: true,
+      });
+      currentMins += duration;
+    }
+
+    // Query active booked appointments on this date
+    const [bookedRows] = await db.execute(
+      `
+      SELECT id, start_time, end_time, status
+      FROM appointments
+      WHERE doctor_id = ?
+        AND appointment_date = ?
+        AND status NOT IN ('cancelled', 'no_show')
+        AND deleted_at IS NULL
+      `,
+      [doctorId, dateString]
+    );
+
+    // Check if target date is today
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const isToday = dateString === todayStr;
+    const currentDayMinutes = now.getHours() * 60 + now.getMinutes();
+
+    // Mark slot statuses
+    for (const slot of slots) {
+      const slotStartMins = this._timeToMinutes(slot.start_time);
+      const slotEndMins = this._timeToMinutes(slot.end_time);
+
+      if (isToday && slotStartMins <= currentDayMinutes) {
+        slot.available = false;
+        slot.reason = 'past';
+        continue;
+      }
+
+      const isBooked = bookedRows.some((appt) => {
+        const apptStartMins = this._timeToMinutes(appt.start_time);
+        const apptEndMins = this._timeToMinutes(appt.end_time);
+        return apptStartMins < slotEndMins && apptEndMins > slotStartMins;
+      });
+
+      if (isBooked) {
+        slot.available = false;
+        slot.reason = 'booked';
+      }
+    }
+
+    return {
+      doctorId: doctor.id,
+      doctorName: doctor.full_name,
+      specialtyId: doctor.specialty_id,
+      specialtyName: doctor.specialty_name_en,
+      specialtyNameAr: doctor.specialty_name_ar,
+      consultationFee: doctor.consultation_fee,
+      date: dateString,
+      dayOfWeek,
+      isWorkDay: true,
+      durationMinutes: duration,
+      workHours: {
+        start: workStart,
+        end: workEnd,
+      },
+      slots,
+    };
+  }
 }
 
 module.exports = new DoctorService();

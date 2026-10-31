@@ -147,17 +147,17 @@ export function BellIcon(props) {
   );
 }
 
-/* MediCare brand mark — pulse/cross inside a shield, matches the
-   reference design system's .brand-mark svg exactly. */
+/* Al-Shifa brand mark — modern medical cross and pulse waveform inside shield */
 export function MedicalCrossIcon(props) {
   return (
-    <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#fff" strokeLinecap="round" {...props}>
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeLinecap="round" {...props}>
       <path
-        d="M6 5.2C8 4 10 3.2 12 3.2s4 .8 6 2C18 12 15.5 18 12 20.8 8.5 18 6 12 6 5.2Z"
-        strokeWidth="1.5"
-        opacity=".5"
+        d="M12 2.8 C18 2.8, 21 5.5, 21 11 C21 18, 12 22, 12 22 C12 22, 3 18, 3 11 C3 5.5, 6 2.8, 12 2.8 Z"
+        strokeWidth="1.6"
+        opacity="0.8"
       />
-      <path d="M12 9v6.2M8.9 12.1h6.2" strokeWidth="2.2" />
+      <path d="M12 7v10M7 12h10" strokeWidth="2.2" />
+      <path d="M5.5 13.5l3 0 1.5-3.5 2 6 2-4.5 1.5 2 3 0" strokeWidth="1.4" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -303,6 +303,15 @@ export function MoreVerticalIcon(props) {
       <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
       <circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none" />
       <circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function PillIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" {...base} {...props}>
+      <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" />
+      <path d="m8.5 8.5 7 7" />
     </svg>
   );
 }

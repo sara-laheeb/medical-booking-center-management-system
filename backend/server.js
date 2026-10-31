@@ -29,11 +29,49 @@ async function verifySchema() {
     }
 }
 
+const reminderService = require("./services/reminderService");
+
+let server = null;
+let initialReminderTimer = null;
+let recurringReminderTimer = null;
+
 // Start HTTP server
 verifySchema().then(() => {
-    app.listen(PORT, () => {
+    server = app.listen(PORT, () => {
         console.log(`Server running on port ${PORT} 🚀`);
         console.log(`Frontend: http://localhost:${PORT}`);
         console.log(`API Base: http://localhost:${PORT}/api/v1`);
+
+        // Initialize 48-hour automated reminder background scheduler
+        initialReminderTimer = setTimeout(() => {
+            reminderService.checkAndSend48hReminders().catch((err) => {
+                console.error("[ReminderScheduler] Initial scan error:", err.message);
+            });
+        }, 5000);
+
+        recurringReminderTimer = setInterval(() => {
+            reminderService.checkAndSend48hReminders().catch((err) => {
+                console.error("[ReminderScheduler] Recurring scan error:", err.message);
+            });
+        }, 6 * 60 * 60 * 1000);
     });
 });
+
+// Graceful shutdown handling
+function handleGracefulShutdown(signal) {
+    console.log(`\nReceived ${signal}. Shutting down gracefully...`);
+    if (initialReminderTimer) clearTimeout(initialReminderTimer);
+    if (recurringReminderTimer) clearInterval(recurringReminderTimer);
+
+    if (server) {
+        server.close(() => {
+            console.log("HTTP server closed.");
+            process.exit(0);
+        });
+    } else {
+        process.exit(0);
+    }
+}
+
+process.on("SIGINT", () => handleGracefulShutdown("SIGINT"));
+process.on("SIGTERM", () => handleGracefulShutdown("SIGTERM"));
