@@ -52,6 +52,47 @@ class PharmacyController {
 
     return ApiResponse.success(res, prescription, 'Prescription cancelled successfully');
   });
+
+  getStats = asyncHandler(async (req, res) => {
+    const stats = await pharmacyService.getPharmacyStats();
+
+    return ApiResponse.success(res, stats, 'Pharmacy statistics retrieved successfully');
+  });
+
+  getTransactions = asyncHandler(async (req, res) => {
+    const result = await pharmacyService.getStockTransactions(req.query);
+
+    return ApiResponse.success(
+      res,
+      result.data,
+      'Stock transactions retrieved successfully',
+      200,
+      result.meta
+    );
+  });
+
+  stockOperation = asyncHandler(async (req, res) => {
+    const result = await pharmacyService.stockOperation(req.body, req.user);
+
+    return ApiResponse.success(
+      res,
+      result,
+      'Stock operation executed successfully',
+      200
+    );
+  });
+
+  getSuppliers = asyncHandler(async (req, res) => {
+    const suppliers = pharmacyService.getSuppliers();
+
+    return ApiResponse.success(res, suppliers, 'Suppliers retrieved successfully');
+  });
+
+  saveSupplier = asyncHandler(async (req, res) => {
+    const supplier = pharmacyService.saveSupplier(req.body);
+
+    return ApiResponse.success(res, supplier, 'Supplier saved successfully', 201);
+  });
 }
 
 module.exports = new PharmacyController();

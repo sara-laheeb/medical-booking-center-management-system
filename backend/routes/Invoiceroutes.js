@@ -20,9 +20,8 @@ const {
 
 const router = Router();
 
-// Billing is managed by admins & receptionists.
+// Authenticate all invoice endpoints. Role checks are applied per endpoint.
 router.use(authenticate);
-router.use(authorize('admin', 'receptionist'));
 
 /**
  * @swagger
@@ -142,10 +141,12 @@ router.use(authorize('admin', 'receptionist'));
 router
   .route('/')
   .get(
+    authorize('admin', 'receptionist', 'doctor', 'patient'),
     validate(invoiceQuerySchema, 'query'),
     invoiceController.getAll
   )
   .post(
+    authorize('admin', 'receptionist'),
     validate(createInvoiceSchema),
     invoiceController.create
   );
@@ -178,6 +179,7 @@ router
  */
 router.get(
   '/:id',
+  authorize('admin', 'receptionist', 'doctor', 'patient'),
   validateId(),
   invoiceController.getById
 );
@@ -226,6 +228,7 @@ router.get(
  */
 router.patch(
   '/:id/pay',
+  authorize('admin', 'receptionist'),
   validateId(),
   validate(recordPaymentSchema),
   invoiceController.recordPayment

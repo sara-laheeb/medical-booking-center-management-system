@@ -17,17 +17,16 @@ const {
 
 const router = Router();
 
-// Invoice endpoints now live under /invoices (see routes/invoiceRoutes.js).
-// This router only covers expenses and the cross-module summary report.
+// Expenses and financial summary reports are restricted exclusively to management (admin).
 router.use(authenticate);
-router.use(authorize('admin', 'receptionist'));
+router.use(authorize('admin'));
 
 /**
  * @swagger
  * /financial/expenses:
  *   get:
  *     summary: Get paginated list of clinic expenses
- *     description: 'Fetch operational expenses with optional category and date range filters. Requires roles: admin, receptionist.'
+ *     description: 'Fetch operational expenses with optional category and date range filters. Requires role: admin.'
  *     tags: [Financial]
  *     security:
  *       - bearerAuth: []
@@ -122,7 +121,7 @@ router.use(authorize('admin', 'receptionist'));
  *         $ref: '#/components/responses/ValidationError'
  *   post:
  *     summary: Record a new clinic expense
- *     description: 'Create a new operational expense entry. Requires roles: admin, receptionist.'
+ *     description: 'Create a new operational expense entry. Requires role: admin.'
  *     tags: [Financial]
  *     security:
  *       - bearerAuth: []

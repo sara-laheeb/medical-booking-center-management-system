@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 80" fill="none">
+  <defs>
+    <linearGradient id="vitaGrad" x1="10" y1="10" x2="70" y2="70" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="50%" stop-color="#0ea5e9" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <linearGradient id="vitaGlow" x1="20" y1="20" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0.08" />
+    </linearGradient>
+  </defs>
+
+  <!-- Protective Medical Shield -->
+  <path d="M40 8 C58 8, 68 15, 68 32 C68 53, 40 68, 40 68 C40 68, 12 53, 12 32 C12 15, 22 8, 40 8 Z"
+        fill="url(#vitaGlow)" stroke="url(#vitaGrad)" stroke-width="2.5" stroke-linejoin="round" />
+
+  <!-- Stylized 'V' for Vita integrated with Medical Cross -->
+  <path d="M28 22 L40 46 L52 22"
+        stroke="#0284c7" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Cross Horizontal Beam -->
+  <path d="M30 31 H50"
+        stroke="#0ea5e9" stroke-width="3" stroke-linecap="round" />
+
+  <!-- Life Pulse Waveform -->
+  <path d="M21 34 L28 34 L32 25 L37 43 L42 27 L46 34 L59 34"
+        stroke="#10b981" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Vitality Spark Dot -->
+  <circle cx="40" cy="27" r="2.5" fill="#38bdf8" />
+
+  <!-- Brand Typography -->
+  <text x="82" y="36" font-family="'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="22" fill="#0f172a" letter-spacing="-0.3">
+    Vita
+    <tspan fill="#0284c7" font-weight="600" font-size="18"> Medical</tspan>
+  </text>
+  <text x="83" y="55" font-family="'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="600" font-size="12" fill="#0f766e" letter-spacing="0.2">
+    COMPLEX · مجمع فيتا الطبي
+  </text>
+</svg>

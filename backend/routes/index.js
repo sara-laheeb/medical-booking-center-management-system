@@ -20,7 +20,8 @@ const financialRoutes   = require("./Financialroutes");
 const dashboardRoutes   = require("./Dashboardroutes");
 const prescriptionRoutes = require('./Prescriptionroutes');
 const billingRoutes = require('./Billing.routes');
-
+const userRoutes = require('./userRoutes');
+const notificationRoutes = require('./notificationRoutes');
 
 const router = express.Router();
 
@@ -60,5 +61,11 @@ router.use("/dashboard", dashboardRoutes);
 router.use('/prescriptions', prescriptionRoutes);
 
 router.use('/billing', billingRoutes);
+
+// User Management (Permissions & Accounts — Manager only)
+router.use('/users', userRoutes);
+
+// In-App Notifications & Reminders
+router.use('/notifications', notificationRoutes);
 
 module.exports = router;

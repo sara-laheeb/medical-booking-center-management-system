@@ -43,4 +43,23 @@ const authorize = (...roles) => {
     };
 };
 
-module.exports = { authenticate, authorize };
+// Optional authentication: attaches req.user if a valid token is provided, without blocking if absent
+const optionalAuth = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return next();
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+    } catch {
+        // Continue unauthenticated on bad token
+    }
+    next();
+};
+
+module.exports = { authenticate, authorize, optionalAuth };

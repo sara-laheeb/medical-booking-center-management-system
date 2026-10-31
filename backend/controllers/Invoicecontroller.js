@@ -15,7 +15,7 @@ const asyncHandler = require('../utils/asyncHandler');
 class InvoiceController {
 
   getAll = asyncHandler(async (req, res) => {
-    const result = await invoiceService.getAllInvoices(req.query);
+    const result = await invoiceService.getAllInvoices(req.query, req.user);
 
     return ApiResponse.success(
       res,
@@ -27,7 +27,7 @@ class InvoiceController {
   });
 
   getById = asyncHandler(async (req, res) => {
-    const invoice = await invoiceService.getInvoiceById(req.params.id);
+    const invoice = await invoiceService.getInvoiceById(req.params.id, req.user);
 
     return ApiResponse.success(
       res,

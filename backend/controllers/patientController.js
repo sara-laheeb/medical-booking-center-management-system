@@ -13,7 +13,7 @@ const asyncHandler   = require('../utils/asyncHandler');
 class PatientController {
 
   getAll = asyncHandler(async (req, res) => {
-    const result = await patientService.getAllPatients(req.query);
+    const result = await patientService.getAllPatients(req.query, req.user);
 
     return ApiResponse.success(
       res,
@@ -25,7 +25,7 @@ class PatientController {
   });
 
   getById = asyncHandler(async (req, res) => {
-    const patient = await patientService.getPatientById(req.params.id);
+    const patient = await patientService.getPatientById(req.params.id, req.user);
 
     return ApiResponse.success(
       res,
@@ -58,7 +58,8 @@ class PatientController {
   update = asyncHandler(async (req, res) => {
     const patient = await patientService.updatePatient(
       req.params.id,
-      req.body
+      req.body,
+      req.user
     );
 
     return ApiResponse.success(

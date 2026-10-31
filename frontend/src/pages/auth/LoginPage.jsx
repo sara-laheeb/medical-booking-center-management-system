@@ -14,13 +14,19 @@ import Input from '../../components/common/Input';
 import Alert from '../../components/common/Alert';
 import ThemeToggle from '../../components/ThemeToggle';
 import LanguageToggle from '../../components/LanguageToggle';
+import BrandLogo from '../../components/BrandLogo';
 
 const DEMO_ACCOUNTS = [
-  { role: 'admin', label: 'Admin', email: 'admin@test.com', password: 'password123' },
-  { role: 'doctor', label: 'Doctor', email: 'doctor@test.com', password: 'password123' },
-  { role: 'receptionist', label: 'Receptionist', email: 'reception@test.com', password: 'password123' },
-  { role: 'pharmacist', label: 'Pharmacist', email: 'pharmacy@test.com', password: 'password123' },
-  { role: 'patient', label: 'Patient', email: 'patient@test.com', password: 'password123' },
+  { id: 'admin', label: 'Admin', email: 'admin@test.com', password: 'sara1234' },
+  { id: 'receptionist', label: 'Receptionist', email: 'receptionist.test@medicare.local', password: 'sara1234' },
+  { id: 'pharmacist', label: 'Pharmacist', email: 'pharmacist@medicare.local', password: 'sara1234' },
+  { id: 'doc_dental', label: 'Dr. Dental', email: 'doctor.dental@medicare.local', password: 'sara1234' },
+  { id: 'doc_rad', label: 'Dr. Radiology', email: 'doctor.radiology@medicare.local', password: 'sara1234' },
+  { id: 'doc_lab', label: 'Dr. Laboratory', email: 'doctor.laboratory@medicare.local', password: 'sara1234' },
+  { id: 'doc_oph', label: 'Dr. Ophthalmology', email: 'doctor.ophthalmology@medicare.local', password: 'sara1234' },
+  { id: 'doc_ortho', label: 'Dr. Orthopedics', email: 'doctor.orthopedics@medicare.local', password: 'sara1234' },
+  { id: 'patient_test', label: 'Patient Test', email: 'patient.test@medicare.local', password: 'sara1234' },
+  { id: 'patient', label: 'Patient', email: 'patient@test.com', password: 'sara1234' },
 ];
 
 /**
@@ -54,7 +60,30 @@ export default function LoginPage() {
       await login(email, password);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err.message || (isAr ? 'فشل تسجيل الدخول. تحقق من البيانات.' : 'Login failed. Please check your credentials.'));
+      const msg = err.message || '';
+      const code = err.data?.errors?.code;
+
+      if (code === 'ACCOUNT_PENDING' || msg.includes('pending administrator approval') || msg.includes('قيد المراجعة')) {
+        setError(
+          isAr
+            ? 'طلب تسجيل حسابك كطبيب قيد المراجعة والاعتماد من قبل إدارة المجمع. يرجى الانتظار لحين اعتماد البيانات.'
+            : 'Your doctor account registration is pending administrator approval. Please wait for verification.'
+        );
+      } else if (code === 'ACCOUNT_REJECTED' || msg.includes('rejected')) {
+        setError(
+          isAr
+            ? 'تم رفض طلب تسجيل الطبيب من قبل الإدارة. يرجى مراجعة إدارة المجمع الطبي.'
+            : 'Your doctor registration request was not approved. Please contact clinic administration.'
+        );
+      } else if (code === 'ACCOUNT_DEACTIVATED' || msg.includes('deactivated')) {
+        setError(
+          isAr
+            ? 'تم تعطيل هذا الحساب من قبل الإدارة.'
+            : 'This account has been deactivated by administration.'
+        );
+      } else {
+        setError(msg || (isAr ? 'فشل تسجيل الدخول. تحقق من البيانات.' : 'Login failed. Please check your credentials.'));
+      }
     } finally {
       setLoading(false);
     }
@@ -129,29 +158,14 @@ export default function LoginPage() {
         }}
       >
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: 14,
-              background: 'linear-gradient(150deg, var(--p-400), var(--p-700))',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#fff',
-              fontWeight: 800,
-              fontSize: 20,
-              boxShadow: '0 8px 20px rgba(15,110,100,0.32)',
-              marginBottom: 14,
-            }}
-          >
-            ✚
+          <div style={{ display: 'inline-flex', justifyContent: 'center', marginBottom: 14 }}>
+            <BrandLogo variant="icon" size={48} />
           </div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--ink)' }}>
-            {t.auth?.signInTitle || 'Sign in to MediCare'}
+            {t.auth?.signInTitle || 'Sign in to Vita Medical'}
           </h1>
           <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 6 }}>
-            {t.auth?.signInSubtitle || 'Access clinical scheduling and records'}
+            {t.auth?.signInSubtitle || 'Access specialized clinical workspace'}
           </p>
         </div>
 
@@ -254,14 +268,14 @@ export default function LoginPage() {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {DEMO_ACCOUNTS.map((acc) => (
               <button
-                key={acc.role}
+                key={acc.id}
                 type="button"
                 className="filter-chip"
                 style={{ fontSize: 11, padding: '5px 10px' }}
                 onClick={() => handleQuickFill(acc)}
                 title={`Prefill ${acc.label} credentials`}
               >
-                {t.auth?.[`role${acc.label}`] || acc.label}
+                {acc.label}
               </button>
             ))}
           </div>

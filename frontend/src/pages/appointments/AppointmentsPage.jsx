@@ -21,6 +21,8 @@ import BookAppointmentModal from './BookAppointmentModal';
 import RescheduleModal from './RescheduleModal';
 import CancelModal from './CancelModal';
 import AppointmentDetailsModal from './AppointmentDetailsModal';
+import PatientModal from '../patients/PatientModal';
+import patientService from '../../services/patientService';
 
 import {
   CalendarIcon,
@@ -72,6 +74,7 @@ export default function AppointmentsPage() {
 
   // Modals state
   const [isBookModalOpen, setIsBookModalOpen] = useState(false);
+  const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
   const [rescheduleTarget, setRescheduleTarget] = useState(null);
   const [cancelTarget, setCancelTarget] = useState(null);
   const [detailsTarget, setDetailsTarget] = useState(null);
@@ -255,6 +258,13 @@ export default function AppointmentsPage() {
   };
 
   const canDelete = ['admin', 'receptionist'].includes(user?.role);
+  const canBook = ['admin', 'receptionist', 'doctor'].includes(user?.role);
+  const canAddPatient = ['admin', 'receptionist', 'doctor'].includes(user?.role);
+  const canConfirm = ['admin', 'receptionist'].includes(user?.role);
+  const canStartConsultation = ['admin', 'doctor'].includes(user?.role);
+  const canCancel = ['admin', 'receptionist', 'doctor', 'patient'].includes(user?.role);
+  const isDoctor = user?.role === 'doctor';
+  const doctorId = user?.doctor?.doctor_id || user?.doctor_id || null;
 
   return (
     <div className="stack" style={{ gap: 'var(--sp-6)', paddingBottom: 'var(--sp-10)' }}>
@@ -303,15 +313,30 @@ export default function AppointmentsPage() {
             <span className="hidden-mobile">{t.dashboard?.refresh || 'Refresh'}</span>
           </button>
 
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => setIsBookModalOpen(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px' }}
-          >
-            <PlusIcon width={17} height={17} />
-            {t.appointments?.bookAppointment || 'Book Appointment'}
-          </button>
+          {canAddPatient && (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setIsPatientModalOpen(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 16px' }}
+              title={isAr ? 'تسجيل مريض جديد' : 'Register New Patient'}
+            >
+              <PlusIcon width={16} height={16} />
+              <span>{isAr ? 'إضافة مريض' : 'Add Patient'}</span>
+            </button>
+          )}
+
+          {canBook && (
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => setIsBookModalOpen(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px' }}
+            >
+              <PlusIcon width={17} height={17} />
+              {t.appointments?.bookAppointment || 'Book Appointment'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -413,25 +438,27 @@ export default function AppointmentsPage() {
             ))}
           </div>
 
-          {/* Doctor filter dropdown */}
-          <div style={{ minWidth: 160 }}>
-            <select
-              className="input select"
-              value={doctorFilter}
-              onChange={(e) => {
-                setDoctorFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              style={{ padding: '6px 12px', fontSize: 12, height: 36, width: '100%' }}
-            >
-              <option value="">{t.appointments?.allDoctors || 'All Clinicians'}</option>
-              {doctorsList.map((doc) => (
-                <option key={doc.id} value={doc.id}>
-                  {doc.full_name}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Doctor filter dropdown (hidden for doctors to preserve clinical data isolation) */}
+          {!isDoctor && (
+            <div style={{ minWidth: 160 }}>
+              <select
+                className="input select"
+                value={doctorFilter}
+                onChange={(e) => {
+                  setDoctorFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
+                style={{ padding: '6px 12px', fontSize: 12, height: 36, width: '100%' }}
+              >
+                <option value="">{t.appointments?.allDoctors || 'All Clinicians'}</option>
+                {doctorsList.map((doc) => (
+                  <option key={doc.id} value={doc.id}>
+                    {doc.full_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Date range presets */}
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -561,15 +588,17 @@ export default function AppointmentsPage() {
             title={t.appointments?.noAppointmentsFound || 'No appointments match the selected filters.'}
             description={t.appointments?.noAppointmentsDesc || 'Try adjusting your search criteria or book a new clinical appointment.'}
             action={
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => setIsBookModalOpen(true)}
-                style={{ display: 'flex', alignItems: 'center', gap: 6 }}
-              >
-                <PlusIcon width={16} height={16} />
-                {t.appointments?.bookAppointment || 'Book Appointment'}
-              </button>
+              canBook ? (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => setIsBookModalOpen(true)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+                >
+                  <PlusIcon width={16} height={16} />
+                  {t.appointments?.bookAppointment || 'Book Appointment'}
+                </button>
+              ) : null
             }
           />
         ) : (
@@ -732,30 +761,32 @@ export default function AppointmentsPage() {
                           </button>
 
                           {/* Fast Action: Confirm (for pending) */}
-                          {apt.status === 'pending' && (
+                          {apt.status === 'pending' && canConfirm && (
                             <button
                               type="button"
                               className="btn btn-primary"
                               onClick={() => handleUpdateStatus(apt.id, 'confirmed')}
                               disabled={isBusy}
-                              style={{ padding: '5px 8px', height: 30 }}
+                              style={{ padding: '5px 10px', height: 30, display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12 }}
                               title={t.appointments?.actionConfirm || 'Confirm'}
                             >
                               <CheckCircleIcon width={14} height={14} />
+                              <span>{isAr ? 'تأكيد' : 'Confirm'}</span>
                             </button>
                           )}
 
                           {/* Fast Action: Start / Complete (for confirmed) */}
-                          {apt.status === 'confirmed' && (
+                          {apt.status === 'confirmed' && (canStartConsultation || canConfirm) && (
                             <button
                               type="button"
                               className="btn btn-primary"
                               onClick={() => handleUpdateStatus(apt.id, 'in_progress')}
                               disabled={isBusy}
-                              style={{ padding: '5px 8px', height: 30 }}
+                              style={{ padding: '5px 10px', height: 30, display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12 }}
                               title={t.appointments?.actionStart || 'Start'}
                             >
                               <CheckCircleIcon width={14} height={14} />
+                              <span>{isAr ? 'بدء' : 'Start'}</span>
                             </button>
                           )}
 
@@ -774,16 +805,26 @@ export default function AppointmentsPage() {
                           )}
 
                           {/* Cancel Button */}
-                          {!isFinal && (
+                          {!isFinal && canCancel && (
                             <button
                               type="button"
                               className="btn btn-secondary"
                               onClick={() => setCancelTarget(apt)}
                               disabled={isBusy}
-                              style={{ padding: '5px 8px', height: 30, color: 'var(--error-600)' }}
+                              style={{
+                                padding: '5px 10px',
+                                height: 30,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 5,
+                                fontSize: 12,
+                                color: 'var(--error-600)',
+                                borderColor: 'var(--error-200)',
+                              }}
                               title={t.appointments?.actionCancel || 'Cancel'}
                             >
                               <XCircleIcon width={14} height={14} />
+                              <span>{isAr ? 'إلغاء' : 'Cancel'}</span>
                             </button>
                           )}
 
@@ -873,6 +914,7 @@ export default function AppointmentsPage() {
       <BookAppointmentModal
         isOpen={isBookModalOpen}
         onClose={() => setIsBookModalOpen(false)}
+        initialDoctorId={isDoctor ? doctorId : null}
         onSuccess={() => {
           showToast(t.appointments?.successBooked || 'Appointment booked successfully.');
           loadAppointments();
@@ -909,7 +951,21 @@ export default function AppointmentsPage() {
         onOpenReschedule={(apt) => setRescheduleTarget(apt)}
         onOpenCancel={(apt) => setCancelTarget(apt)}
         onUpdateStatus={handleUpdateStatus}
+        canConfirm={canConfirm}
       />
+
+      {/* Add Patient Modal */}
+      {isPatientModalOpen && (
+        <PatientModal
+          isOpen={isPatientModalOpen}
+          onClose={() => setIsPatientModalOpen(false)}
+          onSave={async (formData) => {
+            await patientService.create(formData);
+            showToast(isAr ? 'تم تسجيل المريض بنجاح.' : 'Patient registered successfully.');
+            setIsPatientModalOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }

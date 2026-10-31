@@ -54,13 +54,11 @@ class PatientModel {
    * - Status filtering
    * - Search
    */
-  static async findAll({ limit, offset, search, status }) {
+  static async findAll({ limit, offset, search, status, doctorId }) {
 
     const params = [];
 
     let where = 'WHERE p.deleted_at IS NULL';
-
-
 
     if (search) {
 
@@ -83,6 +81,13 @@ class PatientModel {
       );
     }
 
+    if (doctorId) {
+      where += ` AND (
+        EXISTS (SELECT 1 FROM appointments a WHERE a.patient_id = p.id AND a.doctor_id = ? AND a.deleted_at IS NULL)
+        OR EXISTS (SELECT 1 FROM medical_records mr WHERE mr.patient_id = p.id AND mr.doctor_id = ? AND mr.deleted_at IS NULL)
+      )`;
+      params.push(doctorId, doctorId);
+    }
 
     const sql = `
 SELECT
@@ -118,11 +123,11 @@ LIMIT ${Number(limit)} OFFSET ${Number(offset)}
   /**
    * Count patients for pagination metadata.
    */
-  static async countAll({ search }) {
+  static async countAll({ search, doctorId }) {
 
     const params = [];
   
-    let where = 'WHERE deleted_at IS NULL';
+    let where = 'WHERE p.deleted_at IS NULL';
   
     if (search) {
   
@@ -130,11 +135,11 @@ LIMIT ${Number(limit)} OFFSET ${Number(offset)}
   
       where += `
         AND (
-          first_name LIKE ? OR
-          last_name LIKE ? OR
-          patient_code LIKE ? OR
-          phone LIKE ? OR
-          national_id LIKE ?
+          p.first_name LIKE ? OR
+          p.last_name LIKE ? OR
+          p.patient_code LIKE ? OR
+          p.phone LIKE ? OR
+          p.national_id LIKE ?
         )
       `;
   
@@ -146,9 +151,17 @@ LIMIT ${Number(limit)} OFFSET ${Number(offset)}
         like
       );
     }
+
+    if (doctorId) {
+      where += ` AND (
+        EXISTS (SELECT 1 FROM appointments a WHERE a.patient_id = p.id AND a.doctor_id = ? AND a.deleted_at IS NULL)
+        OR EXISTS (SELECT 1 FROM medical_records mr WHERE mr.patient_id = p.id AND mr.doctor_id = ? AND mr.deleted_at IS NULL)
+      )`;
+      params.push(doctorId, doctorId);
+    }
   
     const [result] = await db.execute(
-      `SELECT COUNT(*) AS total FROM patients ${where}`,
+      `SELECT COUNT(*) AS total FROM patients p ${where}`,
       params
     );
   

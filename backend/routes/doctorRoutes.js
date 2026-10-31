@@ -9,7 +9,8 @@ const validateId = require('../middleware/validateId');
 
 const {
   authenticate,
-  authorize
+  authorize,
+  optionalAuth
 } = require('../middleware/authMiddleware');
 
 const {
@@ -20,10 +21,8 @@ const {
 
 const router = Router();
 
-/**
- * Protect all doctor routes.
- */
-router.use(authenticate);
+// Allow public browsing and availability check with optional authentication
+router.use(optionalAuth);
 
 /**
  * @swagger
@@ -128,10 +127,45 @@ router
     doctorController.getAll
   )
   .post(
+    authenticate,
     authorize('admin'),
     validate(createDoctorSchema),
     doctorController.createDoctor
   );
+
+/**
+ * @swagger
+ * /doctors/{id}/availability:
+ *   get:
+ *     summary: Retrieve doctor availability and real time slots for a given date
+ *     description: 'Returns real working schedule slots and booked statuses for a specific date (YYYY-MM-DD).'
+ *     tags: [Doctors]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Doctor ID
+ *       - in: query
+ *         name: date
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Target date in YYYY-MM-DD
+ *     responses:
+ *       200:
+ *         description: Doctor schedule and slots computed successfully
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ */
+router.get(
+  '/:id/availability',
+  validateId(),
+  doctorController.getAvailability
+);
 
 /**
  * @swagger
@@ -229,12 +263,14 @@ router
     doctorController.getDoctorById
   )
   .put(
+    authenticate,
     authorize('admin', 'doctor'),
     validateId(),
     validate(updateDoctorSchema),
     doctorController.updateDoctor
   )
   .delete(
+    authenticate,
     authorize('admin'),
     validateId(),
     doctorController.deleteDoctor

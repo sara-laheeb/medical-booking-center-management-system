@@ -118,7 +118,7 @@ router.use(authenticate);
 router
   .route('/')
   .get(
-    authorize('admin', 'doctor'),
+    authorize('admin', 'doctor', 'patient'),
     validate(recordQuerySchema, 'query'),
     recordController.getAll
   )
@@ -133,7 +133,7 @@ router
  * /records/patient/{patientId}:
  *   get:
  *     summary: Retrieve patient complete medical history
- *     description: 'Fetches all medical records and consultation history for a given patient. Requires role: admin or doctor.'
+ *     description: 'Fetches all medical records and consultation history for a given patient. Requires role: admin, doctor, or patient.'
  *     tags: [Medical Records]
  *     security:
  *       - bearerAuth: []
@@ -156,7 +156,7 @@ router
  */
 router.get(
   '/patient/:patientId',
-  authorize('admin', 'doctor'),
+  authorize('admin', 'doctor', 'patient'),
   validateId('patientId'),
   recordController.getPatientHistory
 );
@@ -226,7 +226,7 @@ router.get(
 router
   .route('/:id')
   .get(
-    authorize('admin', 'doctor'),
+    authorize('admin', 'doctor', 'patient'),
     validateId(),
     recordController.getById
   )

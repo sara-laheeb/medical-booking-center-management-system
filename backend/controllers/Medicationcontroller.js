@@ -37,7 +37,11 @@ class MedicationController {
   });
 
   create = asyncHandler(async (req, res) => {
-    const medication = await medicationService.createMedication(req.body);
+    const medication = await medicationService.createMedication({
+      ...req.body,
+      performed_by: req.user?.id,
+      performer_name: req.user?.name || 'Pharmacist'
+    });
 
     return ApiResponse.success(
       res,
@@ -50,7 +54,11 @@ class MedicationController {
   update = asyncHandler(async (req, res) => {
     const medication = await medicationService.updateMedication(
       req.params.id,
-      req.body
+      {
+        ...req.body,
+        performed_by: req.user?.id,
+        performer_name: req.user?.name || 'Pharmacist'
+      }
     );
 
     return ApiResponse.success(
@@ -63,7 +71,11 @@ class MedicationController {
   adjustStock = asyncHandler(async (req, res) => {
     const medication = await medicationService.adjustStock(
       req.params.id,
-      req.body
+      {
+        ...req.body,
+        performed_by: req.user?.id,
+        performer_name: req.user?.name || 'Pharmacist'
+      }
     );
 
     return ApiResponse.success(

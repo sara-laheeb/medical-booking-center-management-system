@@ -17,6 +17,7 @@
 
 const InvoiceModel = require('../models/Invoice.model');
 const PatientModel = require('../models/patient.model');
+const db = require('../config/database');
 const AppError = require('../errors/AppError');
 
 const round2 = (n) => Math.round(Number(n) * 100) / 100;
@@ -70,16 +71,42 @@ class InvoiceService {
    * Supports pagination, patient/status filters and a creation
    * date range.
    */
-  async getAllInvoices(query = {}) {
+  async getAllInvoices(query = {}, user = null) {
 
     const { page, limit, offset } = this._parsePagination(query);
 
     const filters = {
       patientId: query.patient_id || null,
+      doctorId: query.doctor_id || null,
       status: query.status || null,
       dateFrom: query.date_from || null,
       dateTo: query.date_to || null
     };
+
+    if (user && user.role === 'doctor') {
+      const [docRows] = await db.execute('SELECT id FROM doctors WHERE user_id = ? LIMIT 1', [user.id]);
+      if (docRows[0]) {
+        filters.doctorId = docRows[0].id;
+      } else {
+        return {
+          data: [],
+          meta: { total: 0, page: 1, limit, totalPages: 1, hasNextPage: false, hasPrevPage: false }
+        };
+      }
+    } else if (user && user.role === 'patient') {
+      const [patRows] = await db.execute(
+        'SELECT id FROM patients WHERE user_id = ? OR email = ? LIMIT 1',
+        [user.id, user.email]
+      );
+      if (patRows[0]) {
+        filters.patientId = patRows[0].id;
+      } else {
+        return {
+          data: [],
+          meta: { total: 0, page: 1, limit, totalPages: 1, hasNextPage: false, hasPrevPage: false }
+        };
+      }
+    }
 
     const [data, total] = await Promise.all([
       InvoiceModel.findAll({ limit, offset, ...filters }),
@@ -102,11 +129,26 @@ class InvoiceService {
   }
 
   /**
-   * Retrieve one invoice with its line items.
+   * Retrieve one invoice with its line items, enforcing role access.
    */
-  async getInvoiceById(id) {
+  async getInvoiceById(id, user = null) {
 
     const invoice = await this._findOrFail(id);
+
+    if (user && user.role === 'doctor') {
+      const [docRows] = await db.execute('SELECT id FROM doctors WHERE user_id = ? LIMIT 1', [user.id]);
+      if (!docRows[0] || invoice.doctor_id !== docRows[0].id) {
+        throw new AppError('Doctors can only access invoices associated with their appointments', 403);
+      }
+    } else if (user && user.role === 'patient') {
+      const [patRows] = await db.execute(
+        'SELECT id FROM patients WHERE user_id = ? OR email = ? LIMIT 1',
+        [user.id, user.email]
+      );
+      if (!patRows[0] || invoice.patient_id !== patRows[0].id) {
+        throw new AppError('Patients can only access their own invoices', 403);
+      }
+    }
 
     return this._withItems(invoice);
   }

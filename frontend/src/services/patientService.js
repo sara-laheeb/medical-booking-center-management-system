@@ -26,6 +26,34 @@ export const patientService = {
     const res = await api.get(`/patients/${id}`);
     return res.data;
   },
+
+  /**
+   * Create a new patient
+   * @param {Object} data
+   */
+  async create(data) {
+    const res = await api.post('/patients', data);
+    return res;
+  },
+
+  /**
+   * Update an existing patient
+   * @param {number|string} id
+   * @param {Object} data
+   */
+  async update(id, data) {
+    const res = await api.put(`/patients/${id}`, data);
+    return res;
+  },
+
+  /**
+   * Soft delete a patient
+   * @param {number|string} id
+   */
+  async delete(id) {
+    const res = await api.delete(`/patients/${id}`);
+    return res;
+  },
 };
 
 export default patientService;

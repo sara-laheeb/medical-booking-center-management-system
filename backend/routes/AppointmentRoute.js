@@ -142,7 +142,7 @@ router
     appointmentController.getAll
   )
   .post(
-    authorize('admin', 'receptionist', 'doctor'),
+    authorize('admin', 'receptionist', 'doctor', 'patient'),
     validate(createAppointmentSchema),
     appointmentController.create
   );

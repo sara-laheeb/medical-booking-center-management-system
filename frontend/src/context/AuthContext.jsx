@@ -108,10 +108,12 @@ export function AuthProvider({ children }) {
   );
 
   const register = useCallback(
-    async ({ name, email, password, role = 'patient' }) => {
-      const data = await authService.register({ name, email, password, role });
-      persistSession(data.token, data.user);
-      return data.user;
+    async (payload) => {
+      const data = await authService.register(payload);
+      if (data?.token && data?.user) {
+        persistSession(data.token, data.user);
+      }
+      return data;
     },
     [persistSession]
   );

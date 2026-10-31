@@ -229,12 +229,12 @@ router
 router
   .route('/:id')
   .get(
-    authorize('admin', 'receptionist', 'doctor'),
+    authorize('admin', 'receptionist', 'doctor', 'patient'),
     validateId(),
     patientController.getById
   )
   .put(
-    authorize('admin', 'receptionist', 'doctor'),
+    authorize('admin', 'receptionist', 'doctor', 'patient'),
     validateId(),
     validate(updatePatientSchema),
     patientController.update

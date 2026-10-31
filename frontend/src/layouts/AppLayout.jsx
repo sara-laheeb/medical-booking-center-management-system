@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import ThemeToggle from '../components/ThemeToggle';
 import LanguageToggle from '../components/LanguageToggle';
+import BrandLogo from '../components/BrandLogo';
+import notificationService from '../services/notificationService';
 import {
   CalendarIcon,
   UsersIcon,
@@ -15,9 +17,11 @@ import {
   MenuIcon,
   CloseIcon,
   SearchIcon,
-  PaletteIcon,
   LogoutIcon,
   ChevronLeftIcon,
+  PillIcon,
+  BellIcon,
+  PlusIcon,
 } from '../components/icons';
 
 export default function AppLayout() {
@@ -29,6 +33,29 @@ export default function AppLayout() {
 
   const [collapsed, setCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+
+  // Poll for unread notifications count
+  useEffect(() => {
+    if (!user) return;
+    let isMounted = true;
+    const fetchUnread = () => {
+      notificationService
+        .getAll({ unread: true, limit: 1 })
+        .then((res) => {
+          if (isMounted && res?.meta?.unread_count !== undefined) {
+            setUnreadNotifications(res.meta.unread_count);
+          }
+        })
+        .catch(() => {});
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [user, location.pathname]);
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,16 +71,119 @@ export default function AppLayout() {
     navigate('/login');
   };
 
-  // Build navigation items filtered by role
-  const navSections = useMemo(
-    () => [
+  // Build navigation items filtered by role and medical discipline
+  const navSections = useMemo(() => {
+    // Dedicated, warm, modern navigation for registered patients
+    if (role === 'patient') {
+      return [
+        {
+          key: 'patient-portal',
+          label: isAr ? 'بوابة صحة المريض' : 'Patient Health Portal',
+          items: [
+            {
+              key: 'dashboard',
+              label: t.appNav?.dashboard || (isAr ? 'لوحة التحكم' : 'Dashboard'),
+              to: '/app',
+              end: true,
+              icon: <ChartIcon width={17} height={17} />,
+              roles: ['patient'],
+            },
+            {
+              key: 'book-appointment',
+              label: isAr ? 'حجز موعد' : 'Book Appointment',
+              to: '/app/book-appointment',
+              icon: <PlusIcon width={17} height={17} />,
+              roles: ['patient'],
+            },
+            {
+              key: 'my-appointments',
+              label: isAr ? 'مواعيدي' : 'My Appointments',
+              to: '/app/my-appointments',
+              icon: <CalendarIcon width={17} height={17} />,
+              roles: ['patient'],
+            },
+            {
+              key: 'my-records',
+              label: isAr ? 'سجلاتي الطبية والنتائج' : 'My Medical Records & Results',
+              to: '/app/my-records',
+              icon: <ShieldIcon width={17} height={17} />,
+              roles: ['patient'],
+            },
+            {
+              key: 'my-prescriptions',
+              label: isAr ? 'وصفاتي الطبية' : 'My Prescriptions',
+              to: '/app/my-prescriptions',
+              icon: <PillIcon width={17} height={17} />,
+              roles: ['patient'],
+            },
+            {
+              key: 'notifications',
+              label: isAr ? 'الإشعارات' : 'Notifications',
+              to: '/app/notifications',
+              icon: <BellIcon width={17} height={17} />,
+              badge: unreadNotifications > 0 ? unreadNotifications : null,
+              roles: ['patient'],
+            },
+            {
+              key: 'profile',
+              label: isAr ? 'الملف الشخصي والإعدادات' : 'Profile & Settings',
+              to: '/app/profile',
+              icon: <UsersIcon width={17} height={17} />,
+              roles: ['patient'],
+            },
+          ],
+        },
+      ];
+    }
+
+    // Detect clinician specialty
+    const userSpecialty = (user?.doctor?.specialty_name || '').toLowerCase();
+    const isRadiologyDoctor =
+      role === 'doctor' &&
+      (userSpecialty.includes('radiology') ||
+        userSpecialty.includes('ultrasound') ||
+        userSpecialty.includes('أشعة') ||
+        userSpecialty.includes('سونار'));
+    const isLabDoctor =
+      role === 'doctor' &&
+      (userSpecialty.includes('laboratory') ||
+        userSpecialty.includes('مختبر') ||
+        userSpecialty.includes('lab'));
+    const isDiagnosticDoctor = isRadiologyDoctor || isLabDoctor;
+    const isPrescribingDoctor = role === 'doctor' && !isDiagnosticDoctor;
+
+    // Tailored label for appointments based on specialty
+    let appointmentsLabel = t.appNav?.appointments || (isAr ? 'المواعيد' : 'Appointments');
+    if (isRadiologyDoctor) {
+      appointmentsLabel = isAr ? 'مواعيد وطلبات الأشعة' : 'Imaging Requests';
+    } else if (isLabDoctor) {
+      appointmentsLabel = isAr ? 'مواعيد وطلبات التحاليل' : 'Laboratory Requests';
+    }
+
+    // Tailored label for medical records based on specialty
+    let recordsLabel = t.appNav?.records || (isAr ? 'السجلات الطبية' : 'Medical Records');
+    if (isRadiologyDoctor) {
+      recordsLabel = isAr ? 'تقارير وسجلات الأشعة' : 'Radiology Reports';
+    } else if (isLabDoctor) {
+      recordsLabel = isAr ? 'نتائج وسجلات التحاليل' : 'Laboratory Results';
+    }
+
+    // Dynamic section title for specialized clinical wings
+    let groupManagementLabel = t.appNav?.grpManagement || (isAr ? 'العمليات السريرية' : 'Clinical Operations');
+    if (isRadiologyDoctor) {
+      groupManagementLabel = isAr ? 'جناح الأشعة والسونار' : 'Radiology Workspace';
+    } else if (isLabDoctor) {
+      groupManagementLabel = isAr ? 'المختبر الطبي والتشخيص' : 'Laboratory Workspace';
+    }
+
+    return [
       {
         key: 'management',
-        label: t.appNav?.grpManagement || 'Clinical Operations',
+        label: groupManagementLabel,
         items: [
           {
             key: 'dashboard',
-            label: t.appNav?.dashboard || 'Dashboard',
+            label: t.appNav?.dashboard || (isAr ? 'لوحة التحكم' : 'Dashboard'),
             to: '/app',
             end: true,
             icon: <ChartIcon width={17} height={17} />,
@@ -61,70 +191,80 @@ export default function AppLayout() {
           },
           {
             key: 'appointments',
-            label: t.appNav?.appointments || 'Appointments',
+            label: appointmentsLabel,
             to: '/app/appointments',
             icon: <CalendarIcon width={17} height={17} />,
             roles: ['admin', 'doctor', 'receptionist', 'patient'],
           },
           {
             key: 'patients',
-            label: t.appNav?.patients || 'Patients',
+            label: t.appNav?.patients || (isAr ? 'المرضى' : 'Patients'),
             to: '/app/patients',
             icon: <UsersIcon width={17} height={17} />,
             roles: ['admin', 'doctor', 'receptionist'],
           },
           {
             key: 'doctors',
-            label: t.appNav?.doctors || 'Doctors',
+            label: t.appNav?.doctors || (isAr ? 'الأطباء' : 'Doctors'),
             to: '/app/doctors',
             icon: <StethoscopeIcon width={17} height={17} />,
-            roles: ['admin', 'doctor', 'receptionist', 'patient'],
+            roles: ['admin', 'receptionist'],
           },
           {
             key: 'records',
-            label: t.appNav?.records || 'Medical Records',
+            label: recordsLabel,
             to: '/app/records',
             icon: <ShieldIcon width={17} height={17} />,
-            roles: ['admin', 'doctor', 'receptionist', 'patient'],
+            roles: ['admin', 'doctor', 'patient'],
+          },
+          // Prescriptions: Visible ONLY to Prescribing Clinical Doctors (Dental, Ophthalmology, Orthopedics) and Admin.
+          // Completely removed from Radiology & Ultrasound and Medical Laboratory doctors!
+          // Completely removed from Receptionist, Pharmacist, Patient.
+          ...(isPrescribingDoctor || role === 'admin'
+            ? [
+                {
+                  key: 'prescriptions',
+                  label: t.appNav?.prescriptions || (isAr ? 'الوصفات الطبية' : 'Prescriptions'),
+                  to: '/app/prescriptions',
+                  icon: <PillIcon width={17} height={17} />,
+                  roles: ['admin', 'doctor'],
+                },
+              ]
+            : []),
+          {
+            key: 'overview',
+            label: t.appNav?.overview || (isAr ? 'نظرة عامة على النظام' : 'System Overview'),
+            to: '/app/overview',
+            icon: <ChartIcon width={17} height={17} />,
+            roles: ['admin'],
           },
         ],
       },
       {
         key: 'finance',
-        label: t.appNav?.grpFinance || 'Pharmacy & Billing',
+        label: t.appNav?.grpFinance || (isAr ? 'الصيدلية والفوترة' : 'Pharmacy & Billing'),
         items: [
+          // Pharmacy: Visible ONLY to Pharmacist and Admin.
+          // Completely HIDDEN from ALL doctors (Dentistry, Ophthalmology, Orthopedics, Radiology, Lab)!
+          // Completely HIDDEN from Receptionist, Patient.
           {
             key: 'pharmacy',
-            label: t.appNav?.pharmacy || 'Pharmacy & Prescriptions',
+            label: t.appNav?.pharmacy || (isAr ? 'الصيدلية والمخزون' : 'Pharmacy & Inventory'),
             to: '/app/pharmacy',
             icon: <MedicalCrossIcon width={17} height={17} stroke="currentColor" />,
-            roles: ['admin', 'doctor', 'pharmacist'],
+            roles: ['admin', 'pharmacist'],
           },
           {
             key: 'billing',
-            label: t.appNav?.invoices || 'Invoices & Billing',
+            label: t.appNav?.invoices || (isAr ? 'الفواتير والمالية' : 'Invoices & Billing'),
             to: '/app/billing',
             icon: <InvoiceIcon width={17} height={17} />,
-            roles: ['admin', 'receptionist', 'patient'],
+            roles: ['admin', 'receptionist', 'accountant'],
           },
         ],
       },
-      {
-        key: 'system',
-        label: t.appNav?.grpSystem || 'System & Tools',
-        items: [
-          {
-            key: 'designSystem',
-            label: t.appNav?.designSystem || 'Design System',
-            to: '/design-system',
-            icon: <PaletteIcon width={17} height={17} />,
-            roles: ['admin', 'doctor', 'receptionist', 'pharmacist', 'patient'],
-          },
-        ],
-      },
-    ],
-    [t]
-  );
+    ];
+  }, [t, isAr, role, user, unreadNotifications]);
 
   // Flattened visible items for search filtering
   const allNavItems = useMemo(() => {
@@ -263,10 +403,17 @@ export default function AppLayout() {
         .toUpperCase()
     : 'MD';
 
+  // Standardized role display label
   const roleLabel =
     role && t.auth?.[`role${role.charAt(0).toUpperCase() + role.slice(1)}`]
       ? t.auth[`role${role.charAt(0).toUpperCase() + role.slice(1)}`]
       : role || 'Staff';
+
+  // Specialty-specific clinician badge if user is an authenticated doctor
+  const doctorSpecialtyLabel =
+    user?.doctor
+      ? (isAr ? user.doctor.specialty_name_ar : user.doctor.specialty_name)
+      : null;
 
   return (
     <div className="shell">
@@ -278,14 +425,12 @@ export default function AppLayout() {
             to="/app"
             style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)', minWidth: 0, textDecoration: 'none' }}
           >
-            <div className="brand-mark" title={t.brandName}>
-              <MedicalCrossIcon width={18} height={18} />
-            </div>
-            {!collapsed && (
-              <div className="sidenav-text">
-                <div className="brand-name">{t.brandName}</div>
-                <div className="brand-sub">{t.appNav?.brandSub || 'Clinic Operations'}</div>
+            {collapsed ? (
+              <div className="brand-mark" title={t.brandName}>
+                <BrandLogo variant="icon" size={24} />
               </div>
+            ) : (
+              <BrandLogo variant="full" size={30} showSubtitle />
             )}
           </Link>
 
@@ -422,6 +567,11 @@ export default function AppLayout() {
                     >
                       {item.icon}
                       {!collapsed && <span className="sidenav-text">{item.label}</span>}
+                      {!collapsed && item.badge ? (
+                        <span style={{ marginInlineStart: 'auto', fontSize: 10, fontWeight: 800, padding: '2px 6px', background: 'var(--brand)', color: '#fff', borderRadius: 'var(--r-full)', lineHeight: 1 }}>
+                          {item.badge}
+                        </span>
+                      ) : null}
                     </NavLink>
                   ))}
                 </nav>
@@ -440,7 +590,8 @@ export default function AppLayout() {
               <div className="user-name" title={user?.name}>
                 {user?.name || 'Staff User'}
               </div>
-              <div className="user-role">{roleLabel}</div>
+              {/* Display clinician's specialty or standardized role */}
+              <div className="user-role">{doctorSpecialtyLabel || roleLabel}</div>
             </div>
           )}
           <button
@@ -511,6 +662,7 @@ export default function AppLayout() {
               <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
                 {user?.name || 'User'}
               </span>
+              {/* Top header badge showing doctor's medical specialty or system role */}
               <span
                 style={{
                   fontSize: 10,
@@ -521,7 +673,7 @@ export default function AppLayout() {
                   borderRadius: 'var(--r-full)',
                 }}
               >
-                {roleLabel}
+                {doctorSpecialtyLabel || roleLabel}
               </span>
             </div>
           </div>
@@ -564,12 +716,9 @@ export default function AppLayout() {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div className="brand-mark">
-                    <MedicalCrossIcon width={18} height={18} />
-                  </div>
-                  <div className="brand-name">{t.brandName}</div>
-                </div>
+                <Link to="/app" onClick={() => setMobileMenuOpen(false)} style={{ textDecoration: 'none' }}>
+                  <BrandLogo variant="full" size={26} showSubtitle />
+                </Link>
                 <button
                   type="button"
                   className="icon-btn"
@@ -581,13 +730,17 @@ export default function AppLayout() {
               </div>
 
               <div className="nav-scroll" style={{ flex: 1 }}>
-                {navSections.map((sec) => (
-                  <div key={sec.key} className="nav-group">
-                    <div className="nav-group-label">{sec.label}</div>
-                    <nav>
-                      {sec.items
-                        .filter((item) => (item.roles ? item.roles.includes(role || 'patient') : true))
-                        .map((item) => (
+                {navSections.map((sec) => {
+                  const filteredItems = sec.items.filter((item) =>
+                    item.roles ? item.roles.includes(role || 'patient') : true
+                  );
+                  if (filteredItems.length === 0) return null;
+
+                  return (
+                    <div key={sec.key} className="nav-group">
+                      <div className="nav-group-label">{sec.label}</div>
+                      <nav>
+                        {filteredItems.map((item) => (
                           <NavLink
                             key={item.key}
                             to={item.to}
@@ -599,18 +752,24 @@ export default function AppLayout() {
                           >
                             {item.icon}
                             <span>{item.label}</span>
+                            {item.badge ? (
+                              <span style={{ marginInlineStart: 'auto', fontSize: 10, fontWeight: 800, padding: '2px 6px', background: 'var(--brand)', color: '#fff', borderRadius: 'var(--r-full)', lineHeight: 1 }}>
+                                {item.badge}
+                              </span>
+                            ) : null}
                           </NavLink>
                         ))}
-                    </nav>
-                  </div>
-                ))}
+                      </nav>
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="sidenav-footer">
                 <div className="user-avatar">{userInitials}</div>
                 <div className="user-meta">
                   <div className="user-name">{user?.name}</div>
-                  <div className="user-role">{roleLabel}</div>
+                  <div className="user-role">{doctorSpecialtyLabel || roleLabel}</div>
                 </div>
                 <button
                   type="button"

@@ -266,6 +266,120 @@ class DashboardModel {
 
     return rows;
   }
+
+  /**
+   * Get a doctor's own dashboard summary, scoped by user_id from JWT.
+   * Enforces data isolation — a doctor can only see their own data.
+   */
+  static async getDoctorSummary(userId) {
+    // 1. Get doctor profile with specialty
+    const [[doctor]] = await db.execute(
+      `SELECT d.id AS doctor_id, d.specialty_id, d.license_number, d.consultation_fee,
+              d.work_days, d.work_start, d.work_end, d.appointment_duration,
+              s.name AS specialty_name, s.name_ar AS specialty_name_ar,
+              s.template_type, s.icon AS specialty_icon
+       FROM doctors d
+       JOIN specialties s ON d.specialty_id = s.id
+       WHERE d.user_id = ?`,
+      [userId]
+    );
+    if (!doctor) return null;
+
+    const doctorId = doctor.doctor_id;
+
+    // 2. Today's appointment count
+    const [[todayCounts]] = await db.execute(
+      `SELECT COUNT(*) AS total FROM appointments
+       WHERE doctor_id = ? AND appointment_date = CURDATE() AND deleted_at IS NULL`,
+      [doctorId]
+    );
+
+    // 3. Total unique patients
+    const [[patientCount]] = await db.execute(
+      `SELECT COUNT(DISTINCT patient_id) AS total FROM appointments
+       WHERE doctor_id = ? AND deleted_at IS NULL`,
+      [doctorId]
+    );
+
+    // 4. This week's appointments
+    const [[weekCounts]] = await db.execute(
+      `SELECT COUNT(*) AS total FROM appointments
+       WHERE doctor_id = ? AND deleted_at IS NULL
+         AND YEARWEEK(appointment_date, 1) = YEARWEEK(CURDATE(), 1)`,
+      [doctorId]
+    );
+
+    // 5. Status breakdown
+    const [statusRows] = await db.execute(
+      `SELECT status, COUNT(*) AS total FROM appointments
+       WHERE doctor_id = ? AND deleted_at IS NULL
+       GROUP BY status`,
+      [doctorId]
+    );
+
+    // 6. Recent appointments (last 10) including appointment_id and patient_id for clinical recording
+    const [recentAppts] = await db.execute(
+      `SELECT a.id, a.patient_id, a.appointment_code, a.appointment_date, a.start_time, a.end_time,
+              a.status, a.visit_type, a.chief_complaint,
+              CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
+              p.phone AS patient_phone
+       FROM appointments a
+       INNER JOIN patients p ON p.id = a.patient_id
+       WHERE a.doctor_id = ? AND a.deleted_at IS NULL
+       ORDER BY a.appointment_date DESC, a.start_time DESC
+       LIMIT 10`,
+      [doctorId]
+    );
+
+    // 7. Completed appointments count
+    const [[completedCounts]] = await db.execute(
+      `SELECT COUNT(*) AS total FROM appointments
+       WHERE doctor_id = ? AND status = 'completed' AND deleted_at IS NULL`,
+      [doctorId]
+    );
+
+    // 8. Doctor's Financial Entitlements & Billing metrics
+    const [[finTotals]] = await db.execute(
+      `SELECT COALESCE(SUM(total), 0) AS totalInvoiced,
+              COALESCE(SUM(paid_amount), 0) AS totalCollected,
+              COALESCE(SUM(total - paid_amount), 0) AS totalPending
+       FROM invoices
+       WHERE doctor_id = ?`,
+      [doctorId]
+    );
+
+    // 9. Recent invoices associated with this doctor (last 5)
+    const [recentInvoices] = await db.execute(
+      `SELECT i.id, i.invoice_code, i.total, i.paid_amount, i.status, i.created_at,
+              CONCAT(p.first_name, ' ', p.last_name) AS patient_name
+       FROM invoices i
+       INNER JOIN patients p ON p.id = i.patient_id
+       WHERE i.doctor_id = ?
+       ORDER BY i.created_at DESC
+       LIMIT 5`,
+      [doctorId]
+    );
+
+    return {
+      doctor,
+      appointmentsToday: todayCounts.total,
+      totalPatients: patientCount.total,
+      appointmentsThisWeek: weekCounts.total,
+      appointmentsByStatus: statusRows.reduce((acc, row) => {
+        acc[row.status] = row.total;
+        return acc;
+      }, {}),
+      recentAppointments: recentAppts,
+      financialEntitlements: {
+        consultationFee: Number(doctor.consultation_fee) || 0,
+        completedConsultations: completedCounts.total,
+        totalInvoiced: Number(finTotals.totalInvoiced),
+        totalCollected: Number(finTotals.totalCollected),
+        totalPending: Number(finTotals.totalPending),
+        recentInvoices
+      }
+    };
+  }
 }
 
 module.exports = DashboardModel;

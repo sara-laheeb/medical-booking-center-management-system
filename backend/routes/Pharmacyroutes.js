@@ -192,7 +192,7 @@ router.get(
  */
 router.patch(
   '/prescriptions/:id/dispense',
-  authorize('admin'),
+  authorize('admin', 'pharmacist'),
   validateId(),
   pharmacyController.dispense
 );
@@ -202,7 +202,7 @@ router.patch(
  * /pharmacy/prescriptions/{id}/cancel:
  *   patch:
  *     summary: Cancel a pending prescription
- *     description: 'Cancels a pending prescription. Requires role: admin.'
+ *     description: 'Cancels a pending prescription. Requires role: admin, pharmacist.'
  *     tags: [Pharmacy]
  *     security:
  *       - bearerAuth: []
@@ -227,9 +227,52 @@ router.patch(
  */
 router.patch(
   '/prescriptions/:id/cancel',
-  authorize('admin'),
+  authorize('admin', 'pharmacist'),
   validateId(),
   pharmacyController.cancelPrescription
 );
+
+// ── Pharmacy Inventory & Operations Endpoints ──────────────────────────────
+
+/**
+ * Retrieve comprehensive pharmacy overview statistics (KPIs, stock alerts, valuation).
+ */
+router.get(
+  '/stats',
+  authorize('admin', 'pharmacist'),
+  pharmacyController.getStats
+);
+
+/**
+ * Retrieve paginated immutable stock audit transactions.
+ */
+router.get(
+  '/transactions',
+  authorize('admin', 'pharmacist'),
+  pharmacyController.getTransactions
+);
+
+/**
+ * Execute a stock operation (receive wholesale batch, process return, adjust damage/correction).
+ */
+router.post(
+  '/stock-operations',
+  authorize('admin', 'pharmacist'),
+  pharmacyController.stockOperation
+);
+
+/**
+ * Retrieve and manage registered pharmaceutical suppliers.
+ */
+router
+  .route('/suppliers')
+  .get(
+    authorize('admin', 'pharmacist'),
+    pharmacyController.getSuppliers
+  )
+  .post(
+    authorize('admin', 'pharmacist'),
+    pharmacyController.saveSupplier
+  );
 
 module.exports = router;

@@ -6,7 +6,8 @@ const specialtyController = require('../controllers/Specialtycontroller');
 
 const {
   authenticate,
-  authorize
+  authorize,
+  optionalAuth
 } = require('../middleware/authMiddleware');
 
 const validate = require('../middleware/validate');
@@ -20,8 +21,8 @@ const {
 
 const router = Router();
 
-// Protect all specialty endpoints.
-router.use(authenticate);
+// Allow public browsing with optional authentication
+router.use(optionalAuth);
 
 /**
  * @swagger
@@ -96,6 +97,7 @@ router
     specialtyController.getAll
   )
   .post(
+    authenticate,
     authorize('admin'),
     validate(createSpecialtySchema),
     specialtyController.create
@@ -191,12 +193,14 @@ router
     specialtyController.getById
   )
   .put(
+    authenticate,
     authorize('admin'),
     validateId(),
     validate(updateSpecialtySchema),
     specialtyController.update
   )
   .delete(
+    authenticate,
     authorize('admin'),
     validateId(),
     specialtyController.delete

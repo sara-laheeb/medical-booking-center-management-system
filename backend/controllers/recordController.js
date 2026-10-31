@@ -15,7 +15,7 @@ const asyncHandler = require('../utils/asyncHandler');
 class RecordController {
 
   getAll = asyncHandler(async (req, res) => {
-    const result = await recordService.getAllRecords(req.query);
+    const result = await recordService.getAllRecords(req.query, req.user);
 
     return ApiResponse.success(
       res,
@@ -27,7 +27,7 @@ class RecordController {
   });
 
   getById = asyncHandler(async (req, res) => {
-    const record = await recordService.getRecordById(req.params.id);
+    const record = await recordService.getRecordById(req.params.id, req.user);
 
     return ApiResponse.success(
       res,
@@ -37,7 +37,7 @@ class RecordController {
   });
 
   getPatientHistory = asyncHandler(async (req, res) => {
-    const history = await recordService.getPatientHistory(req.params.patientId);
+    const history = await recordService.getPatientHistory(req.params.patientId, req.user);
 
     return ApiResponse.success(
       res,

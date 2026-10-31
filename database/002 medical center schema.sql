@@ -19,24 +19,6 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Add phone column only if it does not already exist (compatible with MySQL 5.7+)
-DROP PROCEDURE IF EXISTS sp_add_phone_column;
-DELIMITER //
-CREATE PROCEDURE sp_add_phone_column()
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM information_schema.COLUMNS
-        WHERE TABLE_SCHEMA = 'booking_db'
-          AND TABLE_NAME   = 'users'
-          AND COLUMN_NAME  = 'phone'
-    ) THEN
-        ALTER TABLE users ADD COLUMN phone VARCHAR(20) NULL AFTER email;
-    END IF;
-END //
-DELIMITER ;
-CALL sp_add_phone_column();
-DROP PROCEDURE IF EXISTS sp_add_phone_column;
-
 -- ─────────────────────────────────────────────
 -- 2. SPECIALTIES — doctor categories with template type
 -- ─────────────────────────────────────────────

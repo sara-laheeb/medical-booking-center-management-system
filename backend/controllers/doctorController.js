@@ -68,6 +68,22 @@ class DoctorController {
       result.message
     );
   });
+
+  getAvailability = asyncHandler(async (req, res) => {
+    const today = new Date().toISOString().split('T')[0];
+    const targetDate = req.query.date || today;
+
+    const availability = await doctorService.getDoctorAvailability(
+      req.params.id,
+      targetDate
+    );
+
+    return ApiResponse.success(
+      res,
+      availability,
+      'Doctor availability retrieved successfully'
+    );
+  });
 }
 
 module.exports = new DoctorController();
