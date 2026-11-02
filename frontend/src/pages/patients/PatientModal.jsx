@@ -241,7 +241,7 @@ export default function PatientModal({ isOpen, onClose, patient, onSave }) {
                     className="input"
                     value={formData.phone}
                     onChange={handleChange}
-                    placeholder="xxxx"
+                    placeholder="+964 77xxxxxxxx"
                     required
                   />
                 </div>

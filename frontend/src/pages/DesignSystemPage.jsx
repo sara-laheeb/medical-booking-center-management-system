@@ -691,7 +691,7 @@ export default function DesignSystemPage() {
                 label={isAr ? 'رقم الهاتف' : 'Phone Number'}
                 success={isAr ? 'رقم صحيح وموثق' : 'Valid and verified phone'}
               >
-                <Input defaultValue="xxxx" hasSuccess />
+                <Input defaultValue="+964 77xxxxxxxx" hasSuccess />
               </FormField>
             </div>
 

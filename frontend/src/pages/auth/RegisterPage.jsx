@@ -419,7 +419,7 @@ export default function RegisterPage() {
                   <Input
                     type="tel"
                     autoComplete="tel"
-                    placeholder="xxxx"
+                    placeholder="07xxxxxxxx"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     disabled={loading}
